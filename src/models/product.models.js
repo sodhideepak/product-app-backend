@@ -20,23 +20,23 @@ const productschema= new Schema(
         required:true
     },
     ingredients:{
-        type:string,
+        type:String,
         required:true
     },
     nutritional_value:{
-        type:string,
+        type:String,
         required:true
     },
     product_images:{
-        type:string,
-        required:true
+        type:String,
+        // required:true
     },
     product_category:{
-        type:string,
+        type:String,
         required:true
     },
     compared_to_products:{
-        type:string,
+        type:String
        
     }
 
@@ -48,6 +48,6 @@ const productschema= new Schema(
 
 
 
-videoschema.plugin(mongooseAggregatePaginate)
+    productschema.plugin(mongooseAggregatePaginate)
 
 export const product = mongoose.model("product",productschema)

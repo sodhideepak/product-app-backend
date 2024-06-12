@@ -1,31 +1,31 @@
 import { asynchandler } from "../utils/asynchandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import { product } from "../models/user.models.js";
+import { product } from "../models/product.models.js";
 // import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 
-const generateAccessAndRefreshTokens=async(userid)=>{
-    try {
-        const User = await user.findById(userid)
-        console.log(User);
-        const accesstoken = User.generateAccessToken()
-        const refreshtoken = User.generateRefreshToken()
-        // console.log(refreshtoken);
-        User.refreshToken=refreshtoken
-        // console.log("1 :",User.refreshtoken);
-        // console.log("2 :",refreshtoken);
-        await User.save({ validateBeforeSave: false })
+// const generateAccessAndRefreshTokens=async(userid)=>{
+//     try {
+//         const User = await user.findById(userid)
+//         console.log(User);
+//         const accesstoken = User.generateAccessToken()
+//         const refreshtoken = User.generateRefreshToken()
+//         // console.log(refreshtoken);
+//         User.refreshToken=refreshtoken
+//         // console.log("1 :",User.refreshtoken);
+//         // console.log("2 :",refreshtoken);
+//         await User.save({ validateBeforeSave: false })
 
 
-        return{accesstoken,refreshtoken}
+//         return{accesstoken,refreshtoken}
     
-    } catch (error) {
-        throw new ApiError(500,"something went wrong while generating access and refresh token")
-    }
-}
+//     } catch (error) {
+//         throw new ApiError(500,"something went wrong while generating access and refresh token")
+//     }
+// }
 
 const registerproduct = asynchandler(async (req,res)=>{
     // get user details
@@ -61,7 +61,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         product_category,].some((field)=> field?.trim()==="")) {
         throw new ApiError(400,"all fields are required")
     }
-    const existedproduct = await user.findOne(
+    const existedproduct = await product.findOne(
         {
             $or:[{product_barcode}]
         }
@@ -71,7 +71,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         throw new ApiError(409,"product already registered")
     }
 
-    const productimagelocalpath =req.files?.avatar[0]?.path;
+    const productimagelocalpath =req.files?.product_images[0]?.path;
     // const coverimagelocalpath =req.files?.coverimage[0]?.path;
 
 
@@ -79,23 +79,23 @@ const registerproduct = asynchandler(async (req,res)=>{
     // if (req.files && Array.isArray(req.files.product_images) || req.files.product_images.lenght > 0) {
     //     productimagelocalpath = req.files.product_images[0].path
     // }
-    //  console.log("1",Array.isArray(req.files.coverimage));
-    //  console.log("2",req.files);
-    //  console.log("3",req.files.coverimage.lenght > 0);
+     console.log("1",Array.isArray(req.files.product_images));
+     console.log("2",productimagelocalpath);
+     console.log("3",req.files.product_images.lenght > 0);
     // console.log("coverimage :",coverimageLocalPath);
-    // console.log(avatarlocalpath);
-    if (!productimagelocalpath) {
-        throw new ApiError(400,"avatar is required")
-    }
-    
-    // const avatar =await uploadoncloudinary(avatarlocalpath);
-    const productimage =await uploadoncloudinary(productimagelocalpath);
+    // if (!productimagelocalpath) {
+        //     throw new ApiError(400,"avatar is required")
+        // }
+        
+        // const avatar =await uploadoncloudinary(avatarlocalpath);
+        const productimage =await uploadoncloudinary(productimagelocalpath);
+        console.log(productimage);
 
-    if (!productimage) {
-        throw new ApiError(400,"Product Image file is required")
-    }
+    // if (!productimage) {
+    //     throw new ApiError(400,"Product Image file is required")
+    // }
 
-    const Product=await user.create({
+    const Product=await product.create({
         product_barcode,
         product_name,
         product_common_names:product_common_names||"",
@@ -124,5 +124,5 @@ const registerproduct = asynchandler(async (req,res)=>{
 
 export {
     registerproduct,
-    loginuser
+    // loginuser
 }

@@ -17,10 +17,20 @@ cloudinary.config({
         cloudinary.uploader.upload(localfilepath,
            { resourse_type:"auto"})
 
-        console.log("file is uploaded on cloudinary", response.url); //this will return url of the uploaded file which is used on frontend in order to access the file
+           const response =await cloudinary.uploader.upload(localfilepath,
+            { resourse_type:"auto"})
+
+            fs.unlinkSync(localfilepath) 
+
+        // console.log("file is uploaded on cloudinary", response.url); 
+        //this will return url of the uploaded file which is used on frontend in order to access the file
         return response;
     }
     catch(error){
         fs.unlinkSync(localfilepath)  //remove the locally saved file when the operation is got failed 
     }
   }
+
+
+  
+export {uploadoncloudinary}
