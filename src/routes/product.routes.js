@@ -1,6 +1,11 @@
 import { Router } from "express";
 import {
     registerproduct,
+    showproduct,
+    // updateproductfrontimage,
+    // updateproductbackimage,
+    updateproductimages,
+    searchproduct
     // loginuser,
     // logout,
     // refreshAccessToken,
@@ -18,14 +23,42 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const router =Router()
 
-router.route("/register").post(
-    upload.fields([
+router.route("/register").post(registerproduct)
+
+router.route("/showproduct").post(showproduct)
+
+router.route("/searchproduct").post(searchproduct)
+
+
+// router.route("/updateproductfrontimage").post( upload.fields([
+//     {
+//     name:"product_front_image",
+//     maxCount:1
+//     } 
+// ]),
+// updateproductfrontimage)
+
+
+// router.route("/updateproductbackimage").post( upload.fields([
+//         {
+//         name:"product_back_image",
+//         maxCount:1
+//         } 
+//     ]),
+//     updateproductbackimage)
+
+
+router.route("/updateproductimages").post( upload.fields([
         {
-        name:"product_images",
-        maxCount:1
+            name:"product_back_image",
+            maxCount:1
+        },
+        {
+            name:"product_front_image",
+            maxCount:1
         }  
     ]),
-    registerproduct)
+    updateproductimages)
 
 // router.route("/login").post(loginuser)
 

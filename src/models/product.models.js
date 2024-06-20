@@ -1,3 +1,4 @@
+import { json } from "express";
 import mongoose,{Schema} from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
@@ -11,8 +12,8 @@ const productschema= new Schema(
         type:String,
         required:true
     },
-    product_common_names:{
-        type:String,
+    product_keywords:{
+        type:Object,
         
     },
     brand_name:{
@@ -20,24 +21,23 @@ const productschema= new Schema(
         required:true
     },
     ingredients:{
-        type:String,
+        type:Object,
         required:true
     },
     nutritional_value:{
-        type:String,
+        type:Object,
         required:true
     },
-    product_images:{
+    product_front_image:{
         type:String,
         // required:true
+    },
+    product_back_image:{
+        type:String
     },
     product_category:{
         type:String,
         required:true
-    },
-    compared_to_products:{
-        type:String
-       
     }
 
 
@@ -50,4 +50,4 @@ const productschema= new Schema(
 
     productschema.plugin(mongooseAggregatePaginate)
 
-export const product = mongoose.model("product",productschema)
+export const product = mongoose.model("product_data",productschema)
