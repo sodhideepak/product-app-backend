@@ -28,16 +28,16 @@ const productschema= new Schema(
         type:Object,
         required:true
     },
+    product_category:{
+        type:String,
+        required:true
+    },
     product_front_image:{
         type:String,
         // required:true
     },
     product_back_image:{
         type:String
-    },
-    product_category:{
-        type:String,
-        required:true
     }
 
 
@@ -50,4 +50,4 @@ const productschema= new Schema(
 
     productschema.plugin(mongooseAggregatePaginate)
 
-export const product = mongoose.model("product",productschema)
+export const product = mongoose.model("product_data",productschema)
