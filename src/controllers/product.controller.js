@@ -109,7 +109,7 @@ const showproduct = asynchandler(async (req,res)=>{
     const fetched_poduct =await product.findById( product_data._id)
 
 
-    console.log(fetched_poduct.nutritional_value[0].per_serve.kal )
+    // console.log(fetched_poduct.nutritional_value[0].per_serve_200_ml.kcal )
 
 
     // console.log(await product.findById( product_data._id))
