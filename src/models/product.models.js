@@ -14,6 +14,7 @@ const productschema= new Schema(
     },
     product_keywords:{
         type:Object,
+        trim: true
         
     },
     brand_name:{
@@ -22,7 +23,8 @@ const productschema= new Schema(
     },
     ingredients:{
         type:Object,
-        required:true
+        required: true,
+        
     },
     nutritional_value:{
         type:Object,
@@ -38,7 +40,28 @@ const productschema= new Schema(
     },
     product_back_image:{
         type:String
-    }
+    },
+    fruitsVegetablesPercentage:{
+        type:Number
+    },
+    dietry_fiber:{
+        type:Number
+    },
+    fetchCount: {
+        type: Number,
+        default: 0
+      }
+//     product_finalscore:{
+//        type:Number,
+//        required:true
+//    },
+//    product_nutriscore:{
+//        type:String,
+//        required:true
+       
+//    }
+
+
 
 
 
@@ -47,7 +70,12 @@ const productschema= new Schema(
     },{timestamps:true})
 
 
+    productschema.pre('save', function(next) {
+        this.product_keywords = this.product_keywords.map(keyword => keyword.trim());
+        next();
+      });
+
 
     productschema.plugin(mongooseAggregatePaginate)
 
-export const product = mongoose.model("product_data",productschema)
+export const product = mongoose.model("producttt",productschema)

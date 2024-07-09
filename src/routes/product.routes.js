@@ -5,7 +5,10 @@ import {
     // updateproductfrontimage,
     // updateproductbackimage,
     updateproductimages,
-    searchproduct
+    update_product_rating,
+    searchproduct,
+    most_scanned
+    
     // loginuser,
     // logout,
     // refreshAccessToken,
@@ -17,17 +20,38 @@ import {
     // getUserChannelProfile,
     // getWatchHistory
      } from "../controllers/product.controller.js";
+import { 
+    likeDislikeProduct,
+    liked_product
+
+ } from "../controllers/likes.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
-// import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT,getLoggedInUserOrIgnore } from "../middlewares/auth.middleware.js";
 
 
 const router =Router()
 
 router.route("/register").post(registerproduct)
 
-router.route("/showproduct").post(showproduct)
+
+router.route("/showproduct/:product_barcode").post(showproduct)
+
+router.route("/most_scanned").post(most_scanned)
+
+
+router.route("/showproductt/:product_barcode").post(getLoggedInUserOrIgnore,showproduct)
+
+
 
 router.route("/searchproduct").post(searchproduct)
+
+
+
+router.route("/like-product/:product_barcode").post(verifyJWT,likeDislikeProduct)
+router.route("/liked_product").post(verifyJWT,liked_product)
+
+
+router.route("/update_product_rating").post(update_product_rating)
 
 
 // router.route("/updateproductfrontimage").post( upload.fields([
@@ -60,25 +84,9 @@ router.route("/updateproductimages").post( upload.fields([
     ]),
     updateproductimages)
 
-// router.route("/login").post(loginuser)
 
-// router.route("/logout" ).post(verifyJWT,logout)
 
-// router.route("/refresh-token" ).post(refreshAccessToken)
 
-// router.route("/change-password" ).post(verifyJWT,changeCurrentPassword)
-
-// router.route("/current-user" ).post(verifyJWT,getCurrentuser)
-
-// router.route("/update-account" ).patch(verifyJWT,updateAccountDetails)
-
-// router.route("/avatar" ).patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
-
-// router.route("/coverimage" ).patch(verifyJWT,upload.single("coverimage"),updateUsercoverImage)
-
-// router.route("/c/:username").get(verifyJWT,getUserChannelProfile)
-
-// router.route("/history").get(verifyJWT,getWatchHistory)
 
 
 export default router 

@@ -1,43 +1,70 @@
 import bcrypt from "bcrypt";
 import mongoose, { Schema } from "mongoose";
 import  Jwt  from "jsonwebtoken";
+import { Int32 } from "mongodb";
 // structure of the data to be stored in database
 const userschema= new mongoose.Schema({
-    username:{
+    phone_number:{
         type : String,
         required:true,
-        unique:true,
-        lowercase:true,
-        trim:true,
-        index:true
+        // unique:true,
+        // lowercase:true,
+        // trim:true,
+        // index:true
         
     },
-    Email:{
+    email:{
         type: String,
         required: true,
-        unique:true,
-        lowercase:true,
-        trim:true
+        // unique:true,
+        // lowercase:true,
+        // trim:true
     },
     fullname:{
         type : String,
         required: true,
-        trim: true,
-        index: true
+        // trim: true,
+        // index: true
     },
-    avatar:{
-        required:true,
-        type : String, //cloudinary url
-        
+    age:{
+        type: String,
+        required: true,
+        // unique:true,
+        // lowercase:true,
+        // trim:true
     },
-    coverimage:{
-        type : Number,
-       
+    is_email_verified:{
+        type: Boolean,
+        required: true,
+        // unique:true,
+        // lowercase:true,
+        // trim:true
     },
-    watchhistory:{
-        type: Schema.Types.ObjectId,
-        ref:"video"
-    },
+    // height:{
+    //     type: String,
+    //     required: true,
+    //     lowercase:true,
+    //     trim:true
+    // },
+    // weight:{
+    //     type: String,
+    //     required: true,
+    //     lowercase:true,
+    //     trim:true
+    // },
+    // healthcheck:{
+    //     type: String,
+    //     default:null,
+    //     unique:true,
+    //     lowercase:true,
+    //     trim:true
+    // },
+    // bmi:{
+    //     type:String,
+    //     lowercase:true,
+    //     trim:true
+    // },
+    
     password:{
         type : String,
         required:[true,"password is required"]
@@ -45,18 +72,30 @@ const userschema= new mongoose.Schema({
     refreshToken:{
         type:String
 
+    },
+    token:{
+        type:String,
+        default:""
     }
 
-},{timeseries:true})
+},{timestamps:true})
 
 userschema.pre("save",async function (next){
     if (!this.isModified("password")) return next() 
     this.password=await bcrypt.hash(this.password,10)
+    // const Bmi=parseInt(this.weight)/((parseInt(this.height)/100)**2)
+    // this.bmi=parseInt(this.weight)/((parseInt(this.height)/100)**2)
+    // this.bmi=Bmi.toFixed(2)
     next()
+    // if (!this.isModified("weight")) return next() 
+    // this.bmi=parseInt(weight)/((parseInt(height)/100)**2)
+   
+    // next()
+    
 })
 
-userschema.methods.isPasswordCorrect= async function (password){
-    await bcrypt.compare(password,this.password)
+userschema.methods.isPasswordcorrect= async function(password){
+    return await bcrypt.compare(password,this.password)
 } 
 
 
