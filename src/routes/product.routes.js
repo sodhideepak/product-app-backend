@@ -34,21 +34,21 @@ const router =Router()
 router.route("/register").post(registerproduct)
 
 
-router.route("/showproduct/:product_barcode").post(showproduct)
+router.route("/showproduct/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
 
-router.route("/most_scanned").post(most_scanned)
-
-
-router.route("/showproductt/:product_barcode").post(getLoggedInUserOrIgnore,showproduct)
+router.route("/most_scanned").get(most_scanned)
 
 
+// router.route("/showproductt/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
 
-router.route("/searchproduct").post(searchproduct)
+
+
+router.route("/searchproduct").get(searchproduct)
 
 
 
 router.route("/like-product/:product_barcode").post(verifyJWT,likeDislikeProduct)
-router.route("/liked_product").post(verifyJWT,liked_product)
+router.route("/liked_product").get(verifyJWT,liked_product)
 
 
 router.route("/update_product_rating").post(update_product_rating)
