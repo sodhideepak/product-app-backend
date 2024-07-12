@@ -465,18 +465,61 @@ const searchproduct = asynchandler(async (req,res)=>{
 
 
 const most_scanned = asynchandler(async (req,res)=>{
-
     
-    const page = 1
-    const limit = 10
-    const skip = (page - 1) * limit;
+    
+    const products = await product.aggregate([
+        // Match products based on the query parameters
+       {
+           $lookup: {
+               from: 'productratings', // Name of the ratings collection
+               localField: '_id',
+               foreignField: 'product_id', // Adjust the field name if necessary
+               as: 'ratings'
+           }
+       },
+       {
+        $unwind: '$ratings'
+         },
+       {
+           $lookup: {
+             from: "likes",
+             localField: "_id",
+             foreignField: "product_id",
+             as: "likes",
+           },
+       },
+       {
+           $project: {
+             _id: 1,
+             likesCount: 1,
+             ratings: 1,
+             likesCount: { $size: "$likes" },
+             product_barcode: 1,
+             product_name:1,
+             brand_name:1,
+             product_category:1,
+             product_front_image:1,
+             fetchCount:1,
+             product_finalscore: "$ratings.product_finalscore",
+             product_nutriscore: "$ratings.product_nutriscore"
+            //  product_finalscore: '$ratings.product_finalscore'
+           }
+         },
+         {
+        $project:{
+            ratings:0
+        }
+        },
+         {
+           $sort: {
+               fetchCount: -1 // Sort by ratings in descending order (highest first)
+           }
+         },
+       
 
-    const products = await product.find()
-    .sort({ fetchCount: -1 })
-    .skip(skip)
-    .limit(limit)
-    .select('product_name product_barcode fetchCount product_front_image brand_name');
-
+   ])
+ 
+ 
   
 
 
@@ -498,14 +541,60 @@ const most_scanned = asynchandler(async (req,res)=>{
 const allproducts = asynchandler(async (req,res)=>{
 
     
-    const page = 1
-    const limit = 10
-    const skip = (page - 1) * limit;
+    
+    const products = await product.aggregate([
+         // Match products based on the query parameters
+        {
+            $lookup: {
+                from: 'productratings', // Name of the ratings collection
+                localField: '_id',
+                foreignField: 'product_id', // Adjust the field name if necessary
+                as: 'ratings'
+            }
+        },
+        {
+            $unwind: '$ratings'
+        },
+        {
+            $lookup: {
+              from: "likes",
+              localField: "_id",
+              foreignField: "product_id",
+              as: "likes",
+            },
+        },
+        {
+            $project: {
+              likesCount: { $size: "$likes" },  
+              _id: 1,
+              likesCount: 1,
+              ratings: 1,
+              product_barcode: 1,
+              product_name:1,
+              brand_name:1,
+              product_category:1,
+              product_front_image:1,
+              fetchCount:1,
+              product_finalscore: "$ratings.product_finalscore",
+              product_nutriscore: "$ratings.product_nutriscore"
 
-    const products = await product.find()
-    .skip(skip)
-    .limit(limit)
-    .select('product_name product_barcode fetchCount product_front_image brand_name');
+            }
+          },
+          {
+            $project:{
+                ratings:0
+            }
+          },
+        //   {
+        //     $sort: {
+        //         fetchCount: -1 // Sort by ratings in descending order (highest first)
+        //     }
+        //   }
+        
+
+    ])
+  
+  
 
   
 
@@ -517,6 +606,86 @@ const allproducts = asynchandler(async (req,res)=>{
             200,
             
             products
+            ,
+            "products fetched sucessfully")
+    )
+
+})
+
+
+
+const alternateproducts = asynchandler(async (req,res)=>{
+
+   
+       const product_data = await product.aggregate([
+        { $match: req.body },
+         // Match products based on the query parameters
+        {
+            $lookup: {
+                from: 'productratings', // Name of the ratings collection
+                localField: '_id',
+                foreignField: 'product_id', // Adjust the field name if necessary
+                as: 'ratings'
+            }
+        },
+        {
+            $unwind: '$ratings'
+        },
+        {
+            $lookup: {
+              from: "likes",
+              localField: "_id",
+              foreignField: "product_id",
+              as: "likes",
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+            }
+        },
+        {
+            $project: {
+              _id: 1,
+              likesCount: { $size: "$likes" },
+              product_barcode: 1,
+              product_name:1,
+              brand_name:1,
+              product_category:1,
+              product_front_image:1,
+              fetchCount:1,
+              product_finalscore: "$ratings.product_finalscore",
+              product_nutriscore: "$ratings.product_nutriscore"
+
+
+
+            }
+          },
+          {
+            $project:{
+                ratings:0
+            }
+          },
+          {
+            $sort: {
+              ratings: 1 // Sort by ratings in descending order (highest first)
+            }
+          }
+        
+
+    ])
+   
+  
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            product_data
             ,
             "products fetched sucessfully")
     )
@@ -677,6 +846,28 @@ const update_product_rating = asynchandler(async(req,res)=>{
 
  
 
+const categories = asynchandler(async (req,res)=>{
+
+
+      const categories = await product.distinct("product_category");
+
+      const categories_count = categories.length
+  
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                categories,categories_count
+            },
+            "product fetched sucessfully")
+    )
+
+})
+
+
 
 
 export {
@@ -687,6 +878,9 @@ export {
     updateproductimages,
     searchproduct,
     most_scanned,
-    update_product_rating
+    allproducts,
+    update_product_rating,
+    alternateproducts,
+    categories
   
 }

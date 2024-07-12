@@ -50,7 +50,11 @@ const productschema= new Schema(
     fetchCount: {
         type: Number,
         default: 0
-      }
+      },
+    price: {
+        type: Number,
+        default: 0
+    }
 //     product_finalscore:{
 //        type:Number,
 //        required:true

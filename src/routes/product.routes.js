@@ -7,7 +7,10 @@ import {
     updateproductimages,
     update_product_rating,
     searchproduct,
-    most_scanned
+    most_scanned,
+    allproducts,
+    categories,
+    alternateproducts
     
     // loginuser,
     // logout,
@@ -36,7 +39,17 @@ router.route("/register").post(registerproduct)
 
 router.route("/showproduct/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
 
+
 router.route("/most_scanned").get(most_scanned)
+
+
+router.route("/allproducts").get(allproducts)
+
+
+router.route("/alternateproducts").get(alternateproducts)
+
+
+router.route("/categories").get(categories)
 
 
 // router.route("/showproductt/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)

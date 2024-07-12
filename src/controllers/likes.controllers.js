@@ -86,18 +86,31 @@ const likeDislikeProduct = asynchandler(async (req, res) => {
               }
         },
         {
+          $lookup: {
+              from: 'productratings', // Name of the ratings collection
+              localField: 'product_id',
+              foreignField: 'product_id', // Adjust the field name if necessary
+              as: 'ratings'
+          }
+      },
+      {
+        $unwind: '$ratings'
+      },
+      {
             $unwind: '$liked_product'
-          },
-          {
+      },
+      {
             $project: {
               _id: 0, // Exclude the _id field from the result
               'liked_product.product_barcode': 1,
               'liked_product.product_name': 1,
               'liked_product.brand_name': 1,
               'liked_product.product_front_image': 1,
-              'liked_product.product_category': 1
+              'liked_product.product_category': 1,
+              'ratings.product_finalscore':1,
+              'ratings.product_nutriscore':1
             }
-          }
+      }
             
     ]);
   

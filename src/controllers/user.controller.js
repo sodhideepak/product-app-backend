@@ -33,7 +33,7 @@ const sendresetpasswordmail=asynchandler(async(fullname,email,token)=>{
             from:process.env.emailusername,
             to:email,
             subject:"for reset passowrd",
-            html:'<p> hii '+fullname+', please copy the link and <a href="https://register-login-logout.onrender.com/api/v1/users/resetpassword?token='+token+'" > reset your password </a></p>'
+            html:'<p> hii '+fullname+', please copy the link and <a href="http://localhost:7000/api/v1/users/resetpassword?token='+token+'" > reset your password </a></p>'
         }
 
         transporter.sendMail(mailoptions,function(error,info){
@@ -153,9 +153,11 @@ const registeruser = asynchandler(async (req,res)=>{
     }
 
     const verifyotp = await otp.findOne(
-        {
-            Otp
-        }
+        { email: email, Otp: Otp }
+        // {$and: [
+        //     { Opt: Otp },
+        //     { email: email }
+        //   ]}
     );
     //  console.log(verifyotp)
     if(verifyotp){
@@ -802,7 +804,8 @@ const getUserChannelProfile = asynchandler(async(req,res)=>{
 
 const forgotpassword = asynchandler(async(req,res)=>{
 
-
+// before production just change the link address to render addresss of which the email is send to user
+// change the address of mail in mail optins in the send password reset mail
 
         const email = req.body.email
         const userdata =await user.findOne({email:email})
@@ -829,6 +832,9 @@ const forgotpassword = asynchandler(async(req,res)=>{
 
 
 const resetpassword = asynchandler(async(req,res)=>{
+
+    // before production just change the link address to render addresss of which the email is send to user
+    // change the address of mail in mail optins in the send password reset mail
     const token =req.query.token
 
     const User = await user.findOne({token:token})
