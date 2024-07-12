@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-// import logger from "../logger/winston.logger.js";
+import logger from "../logger/winston.logger.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asynchandler } from "../utils/asynchandler.js";
 // import { removeUnusedMulterImageFilesOnError } from "../utils/helpers.js";
@@ -15,7 +14,7 @@ import { asynchandler } from "../utils/asynchandler.js";
 //  *
 //  * @description This middleware is responsible to catch the errors from any request handler wrapped inside the {@link asyncHandler}
 //  */
-const errorhandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   let error = err;
 
   // Check if the error is an instance of an ApiError class which extends native Error class
@@ -41,9 +40,9 @@ const errorhandler = (err, req, res, next) => {
 
   logger.error(`${error.message}`);
 
-//   removeUnusedMulterImageFilesOnError(req);
-//   // Send error response
-//   return res.status(error.statusCode).json(response);
+  // removeUnusedMulterImageFilesOnError(req);
+  // Send error response
+  return res.status(error.statusCode).json(response);
 };
 
-export { errorhandler };
+export { errorHandler };

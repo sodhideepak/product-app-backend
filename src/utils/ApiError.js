@@ -1,9 +1,9 @@
-import { errorhandler } from "../middlewares/error.middleware.js";
+import { errorHandler } from "../middlewares/error.middleware.js";
 // /**
 //  * @description Common Error class to throw an error from anywhere.
 //  * The {@link errorHandler} middleware will catch this error at the central place and it will return an appropriate response to the client
 //  */
-class ApiError extends Error {
+class ApiError extends Error { 
 //   /**
 //    *
 //    * @param {number} statusCode
