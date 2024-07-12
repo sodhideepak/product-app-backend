@@ -7,63 +7,32 @@ const userschema= new mongoose.Schema({
     phone_number:{
         type : String,
         required:true,
-        // unique:true,
-        // lowercase:true,
-        // trim:true,
-        // index:true
+        trim: true,
+       
         
     },
     email:{
         type: String,
         required: true,
-        // unique:true,
-        // lowercase:true,
-        // trim:true
+        trim: true,
+        lowercase: true,
+      
     },
     fullname:{
         type : String,
         required: true,
-        // trim: true,
-        // index: true
+        trim: true,
     },
-    age:{
-        type: String,
+    DOB:{
+        type: Date,
         required: true,
-        // unique:true,
-        // lowercase:true,
-        // trim:true
+       
     },
     is_email_verified:{
         type: Boolean,
         required: true,
-        // unique:true,
-        // lowercase:true,
-        // trim:true
+       
     },
-    // height:{
-    //     type: String,
-    //     required: true,
-    //     lowercase:true,
-    //     trim:true
-    // },
-    // weight:{
-    //     type: String,
-    //     required: true,
-    //     lowercase:true,
-    //     trim:true
-    // },
-    // healthcheck:{
-    //     type: String,
-    //     default:null,
-    //     unique:true,
-    //     lowercase:true,
-    //     trim:true
-    // },
-    // bmi:{
-    //     type:String,
-    //     lowercase:true,
-    //     trim:true
-    // },
     
     password:{
         type : String,
@@ -102,10 +71,7 @@ userschema.methods.isPasswordcorrect= async function(password){
 userschema.methods.generateAccessToken=function(){
     return Jwt.sign({
         _id:this._id,
-        email:this.Email,
-        username:this.username,
-        fullname:this.fullname
-        
+        email: this.email        
     },
     process.env.Access_Token_Secret,
     {

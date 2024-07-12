@@ -114,32 +114,37 @@ const generateAccessAndRefreshTokens=async(userid)=>{
 }
 
 
+const calculate_age = function calculateAge(dob) {
+    const dobDate = new Date(dob);
+    const today = new Date();
+
+    let years = today.getFullYear() - dobDate.getFullYear();
+    let months = today.getMonth() - dobDate.getMonth();
+    let days = today.getDate() - dobDate.getDate();
+
+    if (days < 0) {
+        months--;
+        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    return `${years} years ${months} months ${days} days`;
+}
+
 
 
 
 const registeruser = asynchandler(async (req,res)=>{
-    // get user details
-    // validate the data
-    // check if user already exist
-    // check for images/avatar
-    // upload to cloudinary
-    // create user object in db
-    // remove refresh token field for input
-    // check for user creation
-    // return res
-    const {fullname,email,phone_number,age,password,Otp}= req.body
-    // console.log("email =",email);
-    // console.log("fullname =",fullname);
-    // console.log("phone_number=",phone_number);
-    // console.log("password=",password);
-    // console.log("height=",height);
-    // console.log("weight=",weight);
-    // console.log("age=",Otp);
-    // console.log("files=",req.files);
-    // console.log("email =",email);
+    
+    
+    const {fullname,email,phone_number,DOB,password}= req.body
     
 
-    if([fullname,email,phone_number,password,age].some((field)=> field?.trim()==="")) {
+    if([fullname,email,phone_number,password,DOB].some((field)=> field?.trim()==="")) {
         throw new ApiError(400,"all fields are required")
     }
     const existeduser = await user.findOne(
@@ -149,67 +154,27 @@ const registeruser = asynchandler(async (req,res)=>{
     )
 
     if (existeduser) {
-        throw new ApiError(409,"user already registered")
+        console.log("hello")
+        throw new ApiError(409,"user already registered",[])
+
     }
-
-    const verifyotp = await otp.findOne(
-        { email: email, Otp: Otp }
-        // {$and: [
-        //     { Opt: Otp },
-        //     { email: email }
-        //   ]}
-    );
-    //  console.log(verifyotp)
-    if(verifyotp){
-        await otp.deleteOne({ _id: verifyotp._id })
-    }
-    else{
-        throw new ApiError(409,"invalid otp")
-    }
-    // const avatarlocalpath =req.files?.avatar[0]?.path;
-    // const coverimagelocalpath =req.files?.coverimage[0]?.path;
-
-
-    // let coverimageLocalPath; 
-    // if (req.files && Array.isArray(req.files.coverimage) || req.files.coverimage.Length > 0) {
-    //     coverimageLocalPath = req.files.coverimage[0].path
-    // }
-    //  console.log("1",Array.isArray(req.files.coverimage));
-    //  console.log("2",req.files);
-    //  console.log("3",req.files.coverimage.Lenght > 0);
-    // console.log("coverimage :",coverimageLocalPath);
-    // console.log(avatarlocalpath);
-    // if (!avatarlocalpath) {
-    //     throw new ApiError(400,"avatar is required")
-    // }
-    
-    // const avatar =await uploadoncloudinary(avatarlocalpath);
-    // const coverimage =await uploadoncloudinary(coverimageLocalPath);
-
-    // if (!avatar) {
-    //     throw new ApiError(400,"avatar file is required")
-    // }
- 
+     
+   
     const User=await user.create({
         fullname,
-        // avatar:avatar.url,
-        // coverimage:coverimage?.url || "",
         email,
-        age,
-        // height,
-        // weight,
-        // healthcheck,
+        DOB,
         password,
-        // bmi, 
         phone_number,
-        is_email_verified:1
+        is_email_verified:0,
+        user_avatar:""
 
     })
 
-    const createduser =await user.findById( User._id).select("-password -refreshToken");    
+    const createduser =await user.findById( User._id).select("-password -refreshToken -token");    
 
     if (!createduser) {
-        throw new ApiError(500,"something went wrong while registering the user")
+        throw new ApiError(500,"something went wrong while registering the user");
     }
 
     return res.status(201).json(
@@ -228,7 +193,6 @@ const send_otp = asynchandler(async(req,res)=>{
 
 
     const email = req.body.email
-    // const userdata =await user.findOne({email:email})
 
     if (email) {
         const ramdomotp=Math.floor(100000 + Math.random() * 900000).toString();
@@ -286,9 +250,10 @@ const loginuser = asynchandler(async (req,res)=>{
 
     const {accesstoken,refreshtoken} = await generateAccessAndRefreshTokens(User._id)
 
-    const loggedinuser =await user.findById( User._id).select("-password -refreshToken");
+    const loggedinuser =await user.findById( User._id).select("-password -refreshToken").lean();
    
-
+    loggedinuser.age=calculate_age(User.DOB)
+    // console.log(age)
     const options={
         httpOnly:true,
         secure:true,
@@ -326,7 +291,7 @@ const logout =asynchandler(async(req,res)=>{
         }
     )
     
-    // console.log(req.user._id?.refreshToken);
+
     
 
     const options={
@@ -440,71 +405,13 @@ const changeCurrentPassword = asynchandler(async(req,res)=>{
 
 const getCurrentuser =asynchandler(async(req,res)=>{
 
-    const Userid =req.user._id
-    console.log(Userid)
-    const user_data = await user.aggregate([
-        { $match:
-            {_id:new mongoose.Types.ObjectId(Userid)} 
-        }, // Match products based on the query parameters
-         {
-              $project: {
-                phone_number: 1,
-                email: 1,
-                fullname: 1,
-                age: 1,
-                is_email_verified: 1,
-              },
-        },
-        { 
-            $lookup: {
-                from: 'likes', // Name of the ratings collection
-                localField: '_id',
-                foreignField: 'likedBy', // Adjust the field name if necessary
-                as: 'liked_product',
-               
-              }},
-            //   {
-            //     $project: {
-            //       product_id: 1,
-            //     //   email: 1,
-            //     //   fullname: 1,
-            //     //   age: 1,
-            //     //   is_email_verified: 1,
-            //     }},
+   
 
-                    {
-                      $lookup: {
-                        // lookup for the each user's profile
-                        from: "product",
-                        localField: "product_id",
-                        foreignField: "_id",
-                        as: "products",
-                      },
-                    // $match:{
-                    //     product_id:new mongoose.Types.ObjectId(_id)
-                    // }
-                    },
-                    // {
-                    //     $project: {
-                    //       // only project necessary fields
-                    //       product_name: 1,
-                    //       product_barcode: 1,
-                    //       brand_name: 1,
-                    //       product_category: 1,
-                    //       product_front_image: 1
-                    //     },
-                    //   }
-               
-        
-        {
-            $addFields: {
-                liked_product:  "$liked_product" ,
-                products:"$products"
-                
-            }
-        }
+    const user_data= await user.findById(req.user._id).select("-password -refreshToken -token").lean();
+
     
-    ]);
+    user_data.age=calculate_age(req.user.DOB)
+
 
     return res
     .status(200)
@@ -520,7 +427,7 @@ const getCurrentuser =asynchandler(async(req,res)=>{
 
 const updateAccountDetails =asynchandler(async(req,res)=>{
 
-    const {fullname,email}=req.body
+    const {fullname,email,phone_number,DOB}=req.body
 
     if(!fullname || !email){
         throw new ApiError(400,"all fields are required")
@@ -530,7 +437,9 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
         req.user._id,{
             $set: {
                 fullname,
-                email:email,
+                email,
+                phone_number,
+                DOB,
                 is_email_verified:0
 
              
@@ -561,11 +470,9 @@ const verifyemail = asynchandler(async(req,res)=>{
     const User =await user.findOne({email:email})
 
     const verifyotp = await otp.findOne(
-        {
-            Otp
-        }
+        { email: email, Otp: Otp }
     );
-    //  console.log(verifyotp)
+    
     if(verifyotp){
         await otp.deleteOne({ _id: verifyotp._id })
     }
