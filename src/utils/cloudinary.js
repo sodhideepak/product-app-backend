@@ -14,8 +14,6 @@ cloudinary.config({
   const uploadoncloudinary = async (localfilepath)=>{
     try{
         if(!localfilepath) return null
-        cloudinary.uploader.upload(localfilepath,
-           { resourse_type:"auto"})
 
            const response =await cloudinary.uploader.upload(localfilepath,
             { resourse_type:"auto"})
@@ -32,5 +30,19 @@ cloudinary.config({
   }
 
 
+  const deleteFromCloudinary = async (imageUrl) => {
+    // Extract public ID from the URL
+    const publicId = imageUrl.split('/').pop().split('.')[0];
+
+    const response = await cloudinary.uploader.destroy(publicId, (error, result) => {
+        if (error) {
+            throw new ApiError(500, "Error deleting old avatar from Cloudinary");
+        }
+        // return response;
+    });
+
+    return response;
+};
+
   
-export {uploadoncloudinary}
+export {uploadoncloudinary,deleteFromCloudinary}

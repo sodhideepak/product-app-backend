@@ -9,7 +9,7 @@ import {
     changeCurrentPassword,
     getCurrentuser,
     updateAccountDetails,
-    // updateUserAvatar,
+    updateUserAvatar,
     // updateUsercoverImage,
     getUserChannelProfile,
     // getWatchHistory,
@@ -22,19 +22,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router =Router()
 
-router.route("/register").post(
-    // upload.fields([
-    //     {
-    //     name:"avatar",
-    //     maxCount:1
-    //     },
-    //     {
-    //     name:"coverimage",
-    //     maxCount:1
-        
-    //     }
-    // ]),
-    registeruser)
+router.route("/register").post( registeruser)
 
 router.route("/sendotp").post(send_otp)
 
@@ -52,7 +40,7 @@ router.route("/current-user" ).get(verifyJWT,getCurrentuser)
 
 router.route("/update-account" ).patch(verifyJWT,updateAccountDetails)
 
-// router.route("/avatar" ).patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
+router.route("/avatar" ).patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
 
 // router.route("/coverimage" ).patch(verifyJWT,upload.single("coverimage"),updateUsercoverImage)
 

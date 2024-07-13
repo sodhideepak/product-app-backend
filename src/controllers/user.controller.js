@@ -5,7 +5,7 @@ import { otp } from "../models/otp.models.js";
 import { like } from "../models/likes.model.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import { uploadoncloudinary } from "../utils/cloudinary.js";
+import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 import * as nodemailer from "nodemailer"
@@ -511,37 +511,45 @@ const verifyemail = asynchandler(async(req,res)=>{
 
 
 
-// const updateUserAvatar =asynchandler(async(req,res)=>{
+const updateUserAvatar =asynchandler(async(req,res)=>{
     
-//     const avatarlocalpath=req.file?.path
+    const avatarlocalpath=req.file?.path
 
-//     if (!avatarlocalpath) {
-//         throw new ApiError(400,"avatar file is mssing")
-//     }
+    const user_data =  await user.findById(req.user._id);
 
-//     const avatar=await uploadoncloudinary(avatarlocalpath)
+    if (!avatarlocalpath) {
+        throw new ApiError(400,"avatar file is mssing")
 
-//     if (!avatar.url) {
-//         throw new ApiError(400,"error while uploading an avatar")
-//     }
+    }
 
-//     await user.findByIdAndUpdate(
-//         req.user._id,{
-//             $set: {
-//                 avatar:avatar.url
-//             },
+    if(user_data.avatar){
+        console.log("deleting avatar")
+        await deleteFromCloudinary(user_data.avatar)
+    }
+
+    const avatar=await uploadoncloudinary(avatarlocalpath)
+
+    if (!avatar.url) {
+        throw new ApiError(400,"error while uploading an avatar")
+    }
+
+    const response= await user.findByIdAndUpdate(
+        req.user._id,{
+            $set: {
+                avatar:avatar.url
+            },
            
-//         },
-//         {
-//             new:true
-//         }
-//     ).select("-password")
+        },
+        {
+            new:true
+        }
+    ).select("-password -refreshToken -token")
 
-//     return res
-//     .status(200)
-//     .json(new ApiResponse(200,user,"coverimage updated sucessfully"))
+    return res
+    .status(200)
+    .json(new ApiResponse(200,response,"coverimage updated sucessfully"))
 
-// })
+})
 
 // const updateUsercoverImage =asynchandler(async(req,res)=>{
     
@@ -777,7 +785,7 @@ export {
         changeCurrentPassword,
         getCurrentuser,
         updateAccountDetails,
-        // updateUserAvatar,
+        updateUserAvatar,
         // updateUsercoverImage,
         getUserChannelProfile,
         // getWatchHistory,
