@@ -57,8 +57,8 @@ const send_register_otp=asynchandler(async(email,otp,expiresAt)=>{
     try {
         const transporter =nodemailer.createTransport({
             host:"smtp.gmail.com",
-            port:587,
-            secure:false,
+            port:465,
+            secure:true,
             tls:{
                 rejectUnauthorized:false
             },
@@ -68,7 +68,7 @@ const send_register_otp=asynchandler(async(email,otp,expiresAt)=>{
                 pass:process.env.emailpassword
             }
         })
-
+console.log("hello")
         const mailoptions={
             from:process.env.emailusername,
             to:email,
@@ -167,7 +167,7 @@ const registeruser = asynchandler(async (req,res)=>{
         password,
         phone_number,
         is_email_verified:0,
-        user_avatar:""
+        avatar:""
 
     })
 
@@ -250,7 +250,7 @@ const loginuser = asynchandler(async (req,res)=>{
 
     const {accesstoken,refreshtoken} = await generateAccessAndRefreshTokens(User._id)
 
-    const loggedinuser =await user.findById( User._id).select("-password -refreshToken").lean();
+    const loggedinuser =await user.findById( User._id).select("-password -refreshToken -token").lean();
    
     loggedinuser.age=calculate_age(User.DOB)
     // console.log(age)
@@ -655,63 +655,6 @@ const getUserChannelProfile = asynchandler(async(req,res)=>{
     .status(200)
     .json(new ApiResponse(200,channel[0],"user cahnnel fetched sucessfully"))
 })
-
-
-
-
-
-
-// const getWatchHistory = asynchandler(async(req,res)=>{
-
-//     const user = await user.aggregate([
-//         {
-//             $match:{
-//                 _id:new mongoose.Types.ObjectId(req.user._id)
-//             }
-//         },
-//         {
-//             $lookup:{
-//                 from:"video",
-//                 localField:"watchhistory",
-//                 foreignField:"_id",
-//                 as:"watchhistory",
-//                 pipeline:[
-//                     {
-//                         $lookup:{
-//                             from:"users",
-//                             localField:"owner",
-//                             foreignField:"_id",
-//                             as:"owner",
-//                             pipeline:[
-//                                 {
-//                                     $project:{
-//                                         fullname:1,
-//                                         username:1,
-//                                         avatar:1
-//                                     }
-//                                 },{
-//                                     $addFields:{
-//                                         owner:{
-//                                             $first:$owner
-//                                         }
-//                                     }
-//                                 }
-//                             ]
-//                         }
-//                     }
-//                 ]
-//             }
-//         }
-//     ])
-
-//     return res
-//     .status(200)
-//     .json(ApiResponse(
-//         200,
-//         user[0].WatchHistory,
-//         "watch history fetched sucessfully"))
-// })
-
 
 
 
