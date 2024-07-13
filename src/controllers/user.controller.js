@@ -68,12 +68,34 @@ const send_register_otp=asynchandler(async(email,otp,expiresAt)=>{
                 pass:process.env.emailpassword
             }
         })
-console.log("hello")
+// console.log("hello")
         const mailoptions={
             from:process.env.emailusername,
             to:email,
-            subject:"OTP to register on heetox",
-            html:'<p> you OTP to register sucessfully is '+otp+' which will expires in '+expiresAt+'</p>'
+            subject: "OTP to Register on Heetox",
+    html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center;">
+            <h2 style="color: #333;">Heetox</h2>
+            <h3 style="color: #444;">OTP Verification</h3>
+        </div>
+        <div style="padding: 20px; text-align: center;">
+            <p style="font-size: 16px; color: #555;">
+                You OTP to register successfully is
+                <span style="font-size: 24px; font-weight: bold; color: #000;">${otp}</span>
+            </p>
+            <p style="font-size: 14px; color: #999;">
+                This OTP will expire in
+                <span style="font-size: 16px; font-weight: bold; color: #000;">${expiresAt}</span>.
+            </p>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; color: #aaa; font-size: 12px;">
+            <p>If you did not request this OTP, please ignore this email.</p>
+            <p>&copy; 2024 Heetox. All rights reserved.</p>
+        </div>
+    </div>
+    `
         }
 
         transporter.sendMail(mailoptions,function(error,info){
