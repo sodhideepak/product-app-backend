@@ -428,21 +428,26 @@ const getCurrentuser =asynchandler(async(req,res)=>{
 const updateAccountDetails =asynchandler(async(req,res)=>{
 
     const {fullname,email,phone_number,DOB}=req.body
+    const user_data = await user.findById(req.user._id)
 
     if(!fullname || !email){
         throw new ApiError(400,"all fields are required")
     }
+    let is_email_verified;
+    if(user_data.email==email){
+        is_email_verified=1
+    }else{
+        is_email_verified=0
+    }
 
     const userdata =await user.findByIdAndUpdate(
-        req.user._id,{
+        user_data._id,{
             $set: {
                 fullname,
                 email,
                 phone_number,
                 DOB,
-                is_email_verified:0
-
-             
+                is_email_verified
             },
            
         },
