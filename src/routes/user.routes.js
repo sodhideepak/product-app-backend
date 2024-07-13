@@ -10,6 +10,7 @@ import {
     getCurrentuser,
     updateAccountDetails,
     updateUserAvatar,
+    removeUserAvatar,
     // updateUsercoverImage,
     getUserChannelProfile,
     // getWatchHistory,
@@ -41,6 +42,8 @@ router.route("/current-user" ).get(verifyJWT,getCurrentuser)
 router.route("/update-account" ).patch(verifyJWT,updateAccountDetails)
 
 router.route("/avatar" ).patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
+
+router.route("/removeavatar" ).patch(verifyJWT,removeUserAvatar)
 
 // router.route("/coverimage" ).patch(verifyJWT,upload.single("coverimage"),updateUsercoverImage)
 

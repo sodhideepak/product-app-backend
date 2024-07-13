@@ -551,6 +551,38 @@ const updateUserAvatar =asynchandler(async(req,res)=>{
 
 })
 
+
+
+const removeUserAvatar =asynchandler(async(req,res)=>{
+
+
+    const user_data = await user.findById(req.user._id);
+    if(user_data.avatar){
+        console.log("deleting avatar")
+        await deleteFromCloudinary(user_data.avatar)
+    }
+    
+
+    const response= await user.findByIdAndUpdate(
+        user_data._id,{
+            $set: {
+                avatar:""
+            },
+           
+        },
+        {
+            new:true
+        }
+    ).select("-password -refreshToken -token")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,response,"UserAvatar removed sucessfully"))
+
+})
+
+
+
 // const updateUsercoverImage =asynchandler(async(req,res)=>{
     
 //     const coverimagelocalpath=req.file?.path
@@ -729,6 +761,7 @@ export {
         getCurrentuser,
         updateAccountDetails,
         updateUserAvatar,
+        removeUserAvatar,
         // updateUsercoverImage,
         getUserChannelProfile,
         // getWatchHistory,
