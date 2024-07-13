@@ -17,8 +17,8 @@ const sendresetpasswordmail=asynchandler(async(fullname,email,token)=>{
     try {
         const transporter =nodemailer.createTransport({
             host:"smtp.gmail.com",
-            port:587,
-            secure:false,
+            port:465,
+            secure:true,
             tls:{
                 rejectUnauthorized:false
             },
@@ -33,7 +33,7 @@ const sendresetpasswordmail=asynchandler(async(fullname,email,token)=>{
             from:process.env.emailusername,
             to:email,
             subject:"for reset passowrd",
-            html:'<p> hii '+fullname+', please copy the link and <a href="http://localhost:7000/api/v1/users/resetpassword?token='+token+'" > reset your password </a></p>'
+            html:'<p> hii '+fullname+', please copy the link and <a href="https://product-app-backend-z83m.onrender.com/api/v1/users/resetpassword?token='+token+'" > reset your password </a></p>'
         }
 
         transporter.sendMail(mailoptions,function(error,info){
