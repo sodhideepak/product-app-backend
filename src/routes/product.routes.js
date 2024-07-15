@@ -10,18 +10,11 @@ import {
     most_scanned,
     allproducts,
     categories,
-    alternateproducts
+    alternateproducts,
+    registeringredient,
+    searchingredient
     
-    // loginuser,
-    // logout,
-    // refreshAccessToken,
-    // changeCurrentPassword,
-    // getCurrentuser,
-    // updateAccountDetails,
-    // updateUserAvatar,
-    // updateUsercoverImage,
-    // getUserChannelProfile,
-    // getWatchHistory
+  
      } from "../controllers/product.controller.js";
 import { 
     likeDislikeProduct,
@@ -37,7 +30,11 @@ const router =Router()
 router.route("/register").post(registerproduct)
 
 
+router.route("/register_ingredient").post(registeringredient)
+
+
 router.route("/showproduct/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
+// router.route("/showproduct").get(showproduct)
 
 
 router.route("/most_scanned").get(most_scanned)
@@ -57,6 +54,8 @@ router.route("/categories").get(categories)
 
 
 router.route("/searchproduct").get(searchproduct)
+
+router.route("/searchingredient").get(searchingredient)
 
 
 

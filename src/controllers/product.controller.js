@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { product } from "../models/product.models.js";
 import { user } from "../models/user.models.js";
 import { productrating } from "../models/productrating.models.js";
+import { ingredient } from "../models/ingredient.model.js";
 // import bcrypt from "bcrypt";
 // import  json  from "express";
 import mongoose from "mongoose";
@@ -267,9 +268,11 @@ const registerproduct = asynchandler(async (req,res)=>{
 })
 
 
+
+
 const showproduct = asynchandler(async (req,res)=>{
 
-    // console.log(req.params)
+    console.log(req.params)
     const {product_barcode}= req.params
 
     if (!product_barcode) {
@@ -280,36 +283,65 @@ const showproduct = asynchandler(async (req,res)=>{
         $or:[ {product_barcode}]
     })
 
-   
-    // if (!product_data) {
-    //     throw new ApiError(400, "product does not exist")
+    
+    // console.log(fetched_product)
+    if (!fetched_product) {
+        throw new ApiError(400, "product does not exist")
         
-    // }
-
-
-
-    // const fetched_poduct =await product.findById( product_data._id)
-
-//     console.log(req.cookies?.accesstoken)
-//     console.log(req.header("Authorization")?.replace("Bearer ","")
-// )   
-
-// const token=req.cookies?.accesstoken ||  req.header("Authorization")?.replace("Bearer ","")
-// let User
-// if(token){
-// const decodedtoken= Jwt.verify(token,process.env.Access_Token_Secret)
-
-//      User = await user.findById(decodedtoken?._id).select("-password -refreshtoken")
-
-// }else{
-//      User=null
-// }
+    }
     
 
-
-    // console.log(req.user)
     const product_data = await product.aggregate([
-        { $match: fetched_product }, // Match products based on the query parameters
+        { $match: { _id: fetched_product._id }}, // Match products based on the query parameters
+        { $unwind: {
+            path: '$ingredients'
+          } },
+        {
+            $lookup: {
+              from: "ingredients",
+              localField: "ingredients",
+              foreignField: "keywords",
+              as: "ingredientDetails"
+            }
+        },
+        { $unwind:  {
+            path: '$ingredientDetails',
+            preserveNullAndEmptyArrays: true // To include products without ratings
+          } },
+        {
+            $group: {
+              _id: "$_id",
+              ingredients: { $push: "$ingredients" },
+              ingredientDetails: { $push: "$ingredientDetails" }
+            }
+        },
+        {
+            $addFields: {
+                ingredients: {
+                    $map: {
+                        input: "$ingredients",
+                        as: "ingredient",
+                        in: {
+                            $mergeObjects: [
+                                { name: "$$ingredient" },
+                                {
+                                    $arrayElemAt: [
+                                        {
+                                            $filter: {
+                                                input: "$ingredientDetails",
+                                                as: "detail",
+                                                cond: { $eq: ["$$detail.name", "$$ingredient"] }
+                                            }
+                                        },
+                                        0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },        
         {
             $lookup: {
                 from: 'productratings', // Name of the ratings collection
@@ -366,6 +398,7 @@ const showproduct = asynchandler(async (req,res)=>{
                       else: false,
                     },
                   },
+                // ingredientDetails:"$ingredientDetails"
                 
                
  
@@ -375,6 +408,9 @@ const showproduct = asynchandler(async (req,res)=>{
             $project:{
                 likes:0,
                 // ratings_id:0
+                ingredientDetails: 0 ,
+                'ingredients._id':0
+
             }
         }
 
@@ -387,27 +423,6 @@ const showproduct = asynchandler(async (req,res)=>{
         { new: true } // Return the updated document
       );
 
-    // console.log(fetched_poduct.nutritional_value[1].per_100ml.kcal )
-
-    // const fruitpercent=98.99
-    // const fiber=0
-
-    // const {finalScore,
-    //     nutriScore
-    //       }= calculateNutriScore(
-    //         fetched_poduct.nutritional_value[1].per_100ml.kcal,
-    //         fetched_poduct.nutritional_value[1].per_100ml.carbs,   
-    //         fetched_poduct.nutritional_value[1].per_100ml.fats,  
-    //         fetched_poduct.nutritional_value[1].per_100ml.protine,   
-    //         fetched_poduct.nutritional_value[1].per_100ml.sodium,
-    //         fruitpercent,
-    //         fiber
-    //       )
-
-    // console.log(finalScore)
-    // console.log(nutriScore)
-
-    // console.log(await product.findById( product_data._id))
     
     return res
     .status(200)
@@ -415,7 +430,7 @@ const showproduct = asynchandler(async (req,res)=>{
         new ApiResponse(
             200,
             {
-                productdata:product_data
+                product_data
             },
             "product fetched sucessfully")
     )
@@ -462,6 +477,8 @@ const searchproduct = asynchandler(async (req,res)=>{
     )
 
 })
+
+
 
 
 const most_scanned = asynchandler(async (req,res)=>{
@@ -870,6 +887,95 @@ const categories = asynchandler(async (req,res)=>{
 
 
 
+
+const registeringredient = asynchandler(async (req,res)=>{
+   
+
+
+
+    const {
+        name,
+        keywords,
+        purpose,
+        ingredients,
+        description
+    }= req.body
+    
+
+
+    const existedproduct = await ingredient.findOne(
+        {
+            $or:[{name}]
+        }
+    )
+
+    if (existedproduct) {
+        throw new ApiError(409,"ingredient already registered")
+    }
+
+    
+
+
+
+    const ingredients_data=await ingredient.create({
+        name,
+        keywords,
+        purpose,
+        ingredients,
+        description
+
+    })
+  
+
+    const result =await ingredient.findById( ingredients_data._id);    
+
+    // console.log
+    if (!result) {
+        throw new ApiError(500,"something went wrong while registering the product")
+    }
+
+
+  
+
+    return res.status(201).json(
+        new ApiResponse(200,{result},"product registered sucessfully")
+        // new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+    )
+
+})
+
+
+
+
+const searchingredient = asynchandler(async (req,res)=>{
+
+    
+    console.log(req.query )
+
+
+    const response = await ingredient.find(req.query)
+
+    if (!response) {
+        throw new ApiError(400, "ingredient does not exist")
+        
+    }
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            response
+            ,
+            "product fetched sucessfully")
+    )
+
+})
+
+
+
 export {
     registerproduct,
     showproduct,
@@ -881,6 +987,8 @@ export {
     allproducts,
     update_product_rating,
     alternateproducts,
-    categories
+    categories,
+    registeringredient,
+    searchingredient
   
 }
