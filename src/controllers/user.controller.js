@@ -2,9 +2,6 @@ import { asynchandler } from "../utils/asynchandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { user } from "../models/user.models.js";
 import { otp } from "../models/otp.models.js";
-import { like } from "../models/likes.model.js";
-import bcrypt from "bcrypt";
-import mongoose from "mongoose";
 import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
@@ -274,6 +271,13 @@ const loginuser = asynchandler(async (req,res)=>{
 
     const loggedinuser =await user.findById( User._id).select("-password -refreshToken -token").lean();
    
+
+    const year = User.DOB.getUTCFullYear();
+    const month = (User.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = User.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    loggedinuser.DOB=formattedDate
     loggedinuser.age=calculate_age(User.DOB)
     // console.log(age)
     const options={
@@ -429,9 +433,14 @@ const getCurrentuser =asynchandler(async(req,res)=>{
 
    
 
-    const user_data= await user.findById(req.user._id).select("-password -refreshToken -token").lean();
+    const user_data= await user.findById(req.user._id).select("-password -refreshToken -token ").lean();
 
+    const year = req.user.DOB.getUTCFullYear();
+    const month = (req.user.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = req.user.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
     
+    user_data.DOB=formattedDate
     user_data.age=calculate_age(req.user.DOB)
 
 
@@ -610,41 +619,6 @@ const removeUserAvatar =asynchandler(async(req,res)=>{
 
 
 
-// const updateUsercoverImage =asynchandler(async(req,res)=>{
-    
-//     const coverimagelocalpath=req.file?.path
-
-//     if (!coverimagelocalpath) {
-//         throw new ApiError(400,"avatar file is mssing")
-//     }
-
-//     const coverimage=await uploadoncloudinary(coverimagelocalpath)
-
-//     if (!coverimage.url) {
-//         throw new ApiError(400,"error while uploading an avatar")
-//     }
-
-//     await user.findByIdAndUpdate(
-//         req.user._id,{
-//             $set: {
-//                 coverimage:coverimage.url
-//             },
-           
-//         },
-//         {
-//             new:true
-//         }
-//     ).select("-password")
-
-//     return res
-//     .status(200)
-//     .json(new ApiResponse(200,user,"coverimage updated sucessfully"))
-// })
-
-
-
-
-
 
 const getUserChannelProfile = asynchandler(async(req,res)=>{
     const {username}=req.prams
@@ -789,9 +763,7 @@ export {
         updateAccountDetails,
         updateUserAvatar,
         removeUserAvatar,
-        // updateUsercoverImage,
         getUserChannelProfile,
-        // getWatchHistory,
         forgotpassword,
         resetpassword
     }

@@ -4,11 +4,7 @@ import { product } from "../models/product.models.js";
 import { user } from "../models/user.models.js";
 import { productrating } from "../models/productrating.models.js";
 import { ingredient } from "../models/ingredient.model.js";
-// import bcrypt from "bcrypt";
-// import  json  from "express";
 import mongoose from "mongoose";
-import  Jwt  from "jsonwebtoken";
-
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -979,8 +975,6 @@ const searchingredient = asynchandler(async (req,res)=>{
 export {
     registerproduct,
     showproduct,
-    // updateproductfrontimage,
-    // updateproductbackimage,
     updateproductimages,
     searchproduct,
     most_scanned,
