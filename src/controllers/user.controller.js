@@ -483,7 +483,7 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
            
         }, 
         {
-            // new:true
+            new:true
         }
     ).select("-password -refreshToken -token").lean()
 
