@@ -481,11 +481,11 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
                 is_email_verified
             },
            
-        },
+        }, 
         {
             // new:true
         }
-    ).select("-password -refreshToken").lean()
+    ).select("-password -refreshToken -token").lean()
 
  
     const year = userdata.DOB.getUTCFullYear();
@@ -554,9 +554,6 @@ const verifyemail = asynchandler(async(req,res)=>{
 
 
 
-
-
-
 const updateUserAvatar =asynchandler(async(req,res)=>{
     
     const avatarlocalpath=req.file?.path
@@ -578,7 +575,7 @@ const updateUserAvatar =asynchandler(async(req,res)=>{
     if (!avatar.url) {
         throw new ApiError(400,"error while uploading an avatar")
     }
-
+    avatar.url = avatar.url.replace(/^http:/, 'https:');
     const response= await user.findByIdAndUpdate(
         req.user._id,{
             $set: {

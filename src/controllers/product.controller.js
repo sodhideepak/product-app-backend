@@ -708,7 +708,8 @@ const alternateproducts = asynchandler(async (req,res)=>{
 
 const updateproductimages = asynchandler(async(req,res)=>{
     const {product_barcode}=req.body
-
+    console.log(product_barcode)
+    console.log(req.files)
 
     console.log("product_front_image",req.files.product_back_image);
     console.log("product_front_image",req.files.product_front_image);
@@ -737,6 +738,8 @@ const updateproductimages = asynchandler(async(req,res)=>{
 
           productbackimage =await uploadoncloudinary(productbackimagelocalpath);
 
+          productbackimage.url = productbackimage.url.replace(/^http:/, 'https:');
+
           Product_data.product_back_image=productbackimage.url || Product_data.product_images.product_back_image
     }
     
@@ -745,6 +748,8 @@ const updateproductimages = asynchandler(async(req,res)=>{
          productfrontimagelocalpath =req.files?.product_front_image[0]?.path ;
 
          productfrontimage =await uploadoncloudinary(productfrontimagelocalpath);
+
+         productfrontimage.url = productfrontimage.url.replace(/^http:/, 'https:');
 
          Product_data.product_front_image=productfrontimage.url || Product_data.product_images.product_front_image
         }
