@@ -483,9 +483,19 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
            
         },
         {
-            new:true
+            // new:true
         }
-    ).select("-password")
+    ).select("-password -refreshToken").lean()
+
+ 
+    const year = userdata.DOB.getUTCFullYear();
+    const month = (userdata.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = userdata.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    userdata.DOB=formattedDate
+    userdata.age=calculate_age(userdata.DOB)
+
   
     return res
     .status(200)
