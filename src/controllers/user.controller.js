@@ -540,8 +540,17 @@ const verifyemail = asynchandler(async(req,res)=>{
         {
             new:true
         }
-    ).select("-password")
+    ).select("-password -refreshToken -token")
 
+
+    const year = userdata.DOB.getUTCFullYear();
+    const month = (userdata.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = userdata.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+
+    userdata.DOB=formattedDate
+    userdata.age=calculate_age(response.DOB)
 
    
        return res
@@ -586,8 +595,16 @@ const updateUserAvatar =asynchandler(async(req,res)=>{
         {
             new:true
         }
-    ).select("-password -refreshToken -token")
+    ).select("-password -refreshToken -token").lean()
 
+    const year = response.DOB.getUTCFullYear();
+    const month = (response.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = response.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+
+    response.DOB=formattedDate
+    response.age=calculate_age(response.DOB)
     return res
     .status(200)
     .json(new ApiResponse(200,response,"coverimage updated sucessfully"))
@@ -616,7 +633,16 @@ const removeUserAvatar =asynchandler(async(req,res)=>{
         {
             new:true
         }
-    ).select("-password -refreshToken -token")
+    ).select("-password -refreshToken -token").lean()
+
+    const year = response.DOB.getUTCFullYear();
+    const month = (response.DOB.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = response.DOB.getUTCDate().toString().padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+
+    response.DOB=formattedDate
+    response.age=calculate_age(response.DOB)
 
     return res
     .status(200)
