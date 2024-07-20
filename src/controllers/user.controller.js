@@ -78,7 +78,7 @@ const send_register_otp=asynchandler(async(email,otp,expiresAt)=>{
         </div>
         <div style="padding: 20px; text-align: center;">
             <p style="font-size: 16px; color: #555;">
-                You OTP to register successfully is
+                Your OTP to register successfully is
                 <span style="font-size: 24px; font-weight: bold; color: #000;">${otp}</span>
             </p>
             <p style="font-size: 14px; color: #999;">
@@ -465,7 +465,7 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
         throw new ApiError(400,"all fields are required")
     }
     let is_email_verified;
-    if(user_data.email==email){
+    if(user_data.email==email&user_data.is_email_verified==true){
         is_email_verified=1
     }else{
         is_email_verified=0
@@ -540,7 +540,7 @@ const verifyemail = asynchandler(async(req,res)=>{
         {
             new:true
         }
-    ).select("-password -refreshToken -token")
+    ).select("-password -refreshToken -token").lean()
 
 
     const year = userdata.DOB.getUTCFullYear();
@@ -550,7 +550,7 @@ const verifyemail = asynchandler(async(req,res)=>{
 
 
     userdata.DOB=formattedDate
-    userdata.age=calculate_age(response.DOB)
+    userdata.age=calculate_age(userdata.DOB)
 
    
        return res
