@@ -30,7 +30,31 @@ const sendresetpasswordmail=asynchandler(async(fullname,email,token)=>{
             from:process.env.emailusername,
             to:email,
             subject:"for reset passowrd",
-            html:'<p> hii '+fullname+', please copy the link and <a href="https://product-app-backend-z83m.onrender.com/api/v1/users/resetpassword?token='+token+'" > reset your password </a></p>'
+            // html:'<p> hii '+fullname+', please copy the link and <a href="https://forgotpassword.heetox.com/?token='+token+'" > reset your password </a></p>'
+
+            html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+        <div style="text-align: center;">
+            <h2 style="color: #1ec559; font-size: 40px;">Heetox</h2>
+            <h3 style="color: #444; font-size: 25px;">Reset Password</h3>
+        </div>
+        <div style="padding: 10px; text-align: center;">
+            <p style="font-size: 18px; color: #000000;">
+            Hii ${fullname}<br>
+                Follow this link to Reset your password<br>
+                <span style="font-size: 24px; font-weight: bold; color: #000;"><a href="https://forgotpassword.heetox.com/?token=${token}" > Link </a></span>
+            </p>
+           
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; color: #aaa; font-size: 12px;">
+            <p>If you did not request this, please ignore this email.</p>
+            <p>&copy; 2024 Heetox. All rights reserved.</p>
+        </div>
+    </div>
+    `
+    
+
         }
 
         transporter.sendMail(mailoptions,function(error,info){
