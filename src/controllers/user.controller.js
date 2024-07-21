@@ -744,7 +744,7 @@ const forgotpassword = asynchandler(async(req,res)=>{
            .status(200)
            .json(new ApiResponse(200,"mail has been sent sucessfully"))
         } else {
-            throw new ApiError(200,"user email does not exist")
+            throw new ApiError(400,"user email does not exist")
         }
     
 
