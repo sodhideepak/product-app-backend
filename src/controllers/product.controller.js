@@ -157,6 +157,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         ingredients,
         nutritional_value,
         product_category,
+        price,
         fruitsVegetablesPercentage,
         dietry_fiber
     }= req.body
@@ -198,11 +199,12 @@ const registerproduct = asynchandler(async (req,res)=>{
 
 
     const Product=await product.create({
-        product_barcode,
+        product_barcode:product_barcode.trim(),
         product_name:product_name.trim(),
         product_category:product_category.trim(),
         product_keywords:product_keywords || [],
         brand_name:brand_name.trim(),
+        price:price,
         ingredients,
         nutritional_value,
         fruitsVegetablesPercentage:fruitsVegetablesPercentage||0,
@@ -307,13 +309,15 @@ const showproduct = asynchandler(async (req,res)=>{
         {
             $group: {
               _id: "$_id",
+              product: { $first: "$$ROOT" }, 
               ingredients: { $push: "$ingredients" },
-              ingredientDetails: { $push: "$ingredientDetails" }
+              ingredientDetails: { $push: "$ingredientDetails" },
+          
             }
         },
         {
             $addFields: {
-                ingredients: {
+                'product.ingredients': {
                     $map: {
                         input: "$ingredients",
                         as: "ingredient",
@@ -337,7 +341,10 @@ const showproduct = asynchandler(async (req,res)=>{
                     }
                 }
             }
-        },        
+        },  
+        {
+            $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
+        },   
         {
             $lookup: {
                 from: 'productratings', // Name of the ratings collection
@@ -394,9 +401,7 @@ const showproduct = asynchandler(async (req,res)=>{
                       else: false,
                     },
                   },
-                // ingredientDetails:"$ingredientDetails"
-                
-               
+           
  
             }
         },

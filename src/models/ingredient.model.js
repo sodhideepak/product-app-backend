@@ -18,8 +18,7 @@ const ingredientschema= new mongoose.Schema({
     description:{
         type: String,
     }
-    },
-    {timestamps:true}
+    }, { versionKey: false }
 )
 
 

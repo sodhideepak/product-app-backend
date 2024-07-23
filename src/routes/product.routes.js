@@ -21,6 +21,7 @@ import {
     liked_product
 
  } from "../controllers/likes.controllers.js";
+import { ConsumeProduct } from "../controllers/consumption.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT,getLoggedInUserOrIgnore } from "../middlewares/auth.middleware.js";
 
@@ -55,7 +56,15 @@ router.route("/categories").get(categories)
 
 router.route("/searchproduct").get(searchproduct)
 
+
+
+
 router.route("/searchingredient").get(searchingredient)
+
+
+
+router.route("/ConsumeProduct/:product_barcode").post(verifyJWT,ConsumeProduct)
+
 
 
 
