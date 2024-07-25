@@ -7,6 +7,7 @@ import { ingredient } from "../models/ingredient.model.js";
 import mongoose from "mongoose";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+// import { log } from "winston";
 
 
 
@@ -447,9 +448,22 @@ const searchproduct = asynchandler(async (req,res)=>{
 
     // const product_data = await product.find( req.query )
 
+    const query = req.query
+    
 
+    const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
+
+        // Match conditions for regex search on product name and keywords
+        const matchConditions = search ? {
+            $or: [
+                { product_name: { $regex: search, $options: 'i' } },
+                { product_keywords: { $regex: search, $options: 'i' } }
+            ]
+        } : {};
     const product_data = await product.aggregate([
-        { $match: req.query }, // Match products based on the query parameters
+        {
+            $match: matchConditions
+        },
         {
             $lookup: {
                 from: 'productratings', // Name of the ratings collection
@@ -457,7 +471,45 @@ const searchproduct = asynchandler(async (req,res)=>{
                 foreignField: 'product_id', // Adjust the field name if necessary
                 as: 'ratings'
             }
-        }
+        },
+        {
+            $unwind: '$ratings'
+        },
+        {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'product_id',
+                as: 'likes'
+            }
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" }
+            }
+        },
+        {
+            $project: {
+              likesCount: { $size: "$likes" },  
+              _id: 1,
+              likesCount: 1,
+              ratings: 1,
+              product_barcode: 1,
+              product_name:1,
+              brand_name:1,
+              product_category:1,
+              product_front_image:1,
+              fetchCount:1,
+              product_finalscore: "$ratings.product_finalscore",
+              product_nutriscore: "$ratings.product_nutriscore"
+
+            }
+          },
+          {
+            $project:{
+                ratings:0
+            }
+          }
     ]);
 
     if (!product_data) {
@@ -580,6 +632,11 @@ const allproducts = asynchandler(async (req,res)=>{
               foreignField: "product_id",
               as: "likes",
             },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" }
+            }
         },
         {
             $project: {

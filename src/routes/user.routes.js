@@ -17,6 +17,7 @@ import {
     forgotpassword,
     resetpassword
      } from "../controllers/user.controller.js";
+import { consumed_products } from "../controllers/consumption.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -54,6 +55,15 @@ router.route("/channel-profile").get(verifyJWT,getUserChannelProfile)
 router.route("/forgotpassword").post(forgotpassword)
 
 router.route("/resetpassword").post(resetpassword)
+
+
+
+
+
+
+
+
+router.route("/consumedproducts").get(verifyJWT,consumed_products)
 
 
 export default router 

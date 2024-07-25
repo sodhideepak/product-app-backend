@@ -12,18 +12,13 @@ const consumptionschema= new mongoose.Schema({
         type: Schema.Types.ObjectId,
         ref: "user"
     },
-    consumed_At_day: {
-        type: Date,
+    consumed_At_date: {
+        type: String,
     },
     consumed_At_time: {
         type: String,
         
-    },
-    consumed_At:{ 
-        type: Date, 
-        default: Date.now 
     }
-    
 
 }
 )

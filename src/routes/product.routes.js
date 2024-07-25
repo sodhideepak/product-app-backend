@@ -21,7 +21,7 @@ import {
     liked_product
 
  } from "../controllers/likes.controllers.js";
-import { ConsumeProduct } from "../controllers/consumption.controllers.js";
+import { ConsumeProduct,Remove_From_Consumption } from "../controllers/consumption.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT,getLoggedInUserOrIgnore } from "../middlewares/auth.middleware.js";
 
@@ -65,10 +65,14 @@ router.route("/searchingredient").get(searchingredient)
 
 router.route("/ConsumeProduct/:product_barcode").post(verifyJWT,ConsumeProduct)
 
+router.route("/RemoveConsumeProduct/:_id").post(verifyJWT,Remove_From_Consumption)
+
 
 
 
 router.route("/like-product/:product_barcode").post(verifyJWT,likeDislikeProduct)
+
+
 router.route("/liked_product").get(verifyJWT,liked_product)
 
 
