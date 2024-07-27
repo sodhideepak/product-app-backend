@@ -290,7 +290,7 @@ const showproduct = asynchandler(async (req,res)=>{
     }
     
 
-    const product_data = await product.aggregate([
+    const response = await product.aggregate([
         { $match: { _id: fetched_product._id }}, // Match products based on the query parameters
         { $unwind: {
             path: '$ingredients'
@@ -425,6 +425,7 @@ const showproduct = asynchandler(async (req,res)=>{
         { new: true } // Return the updated document
       );
 
+      const product_data = response.length > 0 ? response[0] : null;
     
     return res
     .status(200)
