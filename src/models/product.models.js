@@ -44,14 +44,21 @@ const productschema= new Schema(
     fruitsVegetablesPercentage:{
         type:Number
     },
-    dietry_fiber:{
-        type:Number
+    per_serve:{
+        type:String
+    },
+    measuring_unit:{
+        type:String
     },
     fetchCount: {
         type: Number,
         default: 0
       },
     price: {
+        type: Number,
+        default: 0
+    },
+    rank: {
         type: Number,
         default: 0
     }

@@ -12,7 +12,8 @@ import {
     categories,
     alternateproducts,
     registeringredient,
-    searchingredient
+    searchingredient,
+    product_ranking
     
   
      } from "../controllers/product.controller.js";
@@ -60,6 +61,10 @@ router.route("/searchproduct").get(searchproduct)
 
 
 router.route("/searchingredient").get(searchingredient)
+
+
+
+router.route("/product_ranking").get(product_ranking)
 
 
 

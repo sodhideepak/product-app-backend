@@ -8,13 +8,14 @@ import mongoose from "mongoose";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 // import { log } from "winston";
+// import { log } from "winston";
 
 
 
 function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber) {
     // Convert kcal to kJ (1 kcal = 4.184 kJ)
-    // let energy = kcal * 4.184;
-    let energy = kcal * 0;
+    let energy = kcal * 4.184;
+    // let energy = kcal * 0;
 
     // Define thresholds for negative points
     const negativePoints = {
@@ -119,11 +120,17 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
     // let fruitsVegetablesPercentage = 19.5;
     // let fiber = 0;
 
+    // console.log("1",fruitsVegetablesPercentage);
+    // console.log("2",fiber);
+    // console.log("3",protein); 
+
     let positiveScore = getPoints(fruitsVegetablesPercentage, positivePoints.fruitsVegetables) +
                         getPoints(fiber, positivePoints.fiber) +
                         getPoints(protein, positivePoints.protein);
 
     // Calculate final score
+    // console.log(negativeScore);
+    // console.log(positiveScore);
     let finalScore = negativeScore - positiveScore;
 
     // Determine Nutri-Score
@@ -227,16 +234,26 @@ const registerproduct = asynchandler(async (req,res)=>{
     }
 
 
+    // console.log( createdproduct.nutritional_value.energy,
+    //     createdproduct.nutritional_value.carbohydrates.total_sugar,   
+    //     createdproduct.nutritional_value.total_fat.saturates_fats,  
+    //     createdproduct.nutritional_value.protein,   
+    //     createdproduct.nutritional_value.sodium,
+    //     createdproduct.fruitsVegetablesPercentage,
+    //     createdproduct.nutritional_value.carbohydrates.dietry_fibre
+    //   );
+
+
     const {finalScore,
         nutriScore
           }= calculateNutriScore(
-            createdproduct.nutritional_value[1].per_100ml.kcal,
-            createdproduct.nutritional_value[1].per_100ml.carbs,   
-            createdproduct.nutritional_value[1].per_100ml.fats,  
-            createdproduct.nutritional_value[1].per_100ml.protine,   
-            createdproduct.nutritional_value[1].per_100ml.sodium,
+            createdproduct.nutritional_value.energy,
+            createdproduct.nutritional_value.carbohydrates.total_sugar,   
+            createdproduct.nutritional_value.total_fat.saturates_fats,  
+            createdproduct.nutritional_value.protein,   
+            createdproduct.nutritional_value.sodium,
             createdproduct.fruitsVegetablesPercentage,
-            createdproduct.dietry_fiber
+            createdproduct.nutritional_value.carbohydrates.dietry_fibre
           )
 
     // console.log( createdproduct.fruitsVegetablesPercentage)
@@ -307,6 +324,7 @@ const showproduct = asynchandler(async (req,res)=>{
             path: '$ingredientDetails',
             preserveNullAndEmptyArrays: true // To include products without ratings
           } },
+         
         {
             $group: {
               _id: "$_id",
@@ -402,16 +420,20 @@ const showproduct = asynchandler(async (req,res)=>{
                       else: false,
                     },
                   },
+                 
+            }
            
  
-            }
+            
         },
         {
             $project:{
                 likes:0,
                 // ratings_id:0
                 ingredientDetails: 0 ,
-                'ingredients._id':0
+                'ingredients._id':0,
+                'nutritional_value.k': 0
+
 
             }
         }
@@ -425,8 +447,9 @@ const showproduct = asynchandler(async (req,res)=>{
         { new: true } // Return the updated document
       );
 
-      const product_data = response.length > 0 ? response[0] : null;
-    
+      var product_data = response.length > 0 ? response[0] : null;
+       
+    //   product_data=product_data.nutritional_value.toObject();
     return res
     .status(200)
     .json(
@@ -609,6 +632,59 @@ const most_scanned = asynchandler(async (req,res)=>{
 
 
 
+
+const product_ranking = asynchandler(async (req,res)=>{
+    
+    
+    const categories = await product.distinct("product_category");
+
+    console.log(categories);
+  // Iterate through each category and rank the top 20 products
+
+for (const category of categories) {
+    const topProducts = await product.aggregate([
+        { $match: { product_category: category}  },
+        {
+            $lookup: {
+                from: 'productratings', // Name of the ratings collection
+                localField: '_id',
+                foreignField: 'product_id', // Adjust the field name if necessary
+                as: 'ratings'
+            }
+        },
+        {
+            $unwind: '$ratings'
+        },
+        { $sort: { 'ratings.product_finalscore': 1 } }, // Sorting by highest ratings
+        { $limit: 20 }
+      ]);
+    
+    console.log(topProducts)
+      // Assign ranks
+       for (let i = 0; i < topProducts.length; i++) {
+        topProducts[i].rank = i + 1;
+        await product.updateOne({ _id: topProducts[i]._id }, { $set: { rank: topProducts[i].rank } });
+      }
+      };
+ 
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            {}
+            ,
+            "products ranking updated sucessfully")
+    )
+
+})
+
+
+
+
+
+
 const allproducts = asynchandler(async (req,res)=>{
 
     
@@ -774,8 +850,8 @@ const updateproductimages = asynchandler(async(req,res)=>{
     console.log(product_barcode)
     console.log(req.files)
 
-    console.log("product_front_image",req.files.product_back_image);
-    console.log("product_front_image",req.files.product_front_image);
+    // console.log("product_front_image",req.files.product_back_image);
+    // console.log("product_front_image",req.files.product_front_image);
     // console.log("product_front_image",product_back_image);
 
 
@@ -1051,6 +1127,7 @@ export {
     alternateproducts,
     categories,
     registeringredient,
-    searchingredient
+    searchingredient,
+    product_ranking
   
 }
