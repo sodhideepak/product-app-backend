@@ -152,6 +152,104 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
 
 
 
+const update_product = asynchandler(async (req,res)=>{
+   
+
+
+
+    const {
+        product_barcode,
+        product_name,
+        product_keywords,
+        brand_name,
+        ingredients,
+        nutritional_value,
+        product_category,
+        price,
+        fruitsVegetablesPercentage,
+        dietry_fiber
+    }= req.body
+    // console.log("email =",email);
+    
+
+    // if( !product_barcode||
+    //     !product_name||
+    //     !brand_name||
+    //     !ingredients||
+    //     !nutritional_value||
+    //     !product_category) {
+    //     throw new ApiError(400,"all fields are required")
+    // }
+    const existedproduct = await product.findOne(
+        {
+            $or:[{product_barcode}]
+        }
+    )
+
+    if (!existedproduct) {
+        throw new ApiError(409,"product is not registered")
+    }
+
+
+  
+
+    const createdproduct =await product.findById( Product._id);    
+
+    // console.log
+    if (!createdproduct) {
+        throw new ApiError(500,"something went wrong while registering the product")
+    }
+
+
+    // console.log( createdproduct.nutritional_value.energy,
+    //     createdproduct.nutritional_value.carbohydrates.total_sugar,   
+    //     createdproduct.nutritional_value.total_fat.saturates_fats,  
+    //     createdproduct.nutritional_value.protein,   
+    //     createdproduct.nutritional_value.sodium,
+    //     createdproduct.fruitsVegetablesPercentage,
+    //     createdproduct.nutritional_value.carbohydrates.dietry_fibre
+    //   );
+
+
+    const {finalScore,
+        nutriScore
+          }= calculateNutriScore(
+            createdproduct.nutritional_value.energy,
+            createdproduct.nutritional_value.carbohydrates.total_sugar,   
+            createdproduct.nutritional_value.total_fat.saturates_fats,  
+            createdproduct.nutritional_value.protein,   
+            createdproduct.nutritional_value.sodium,
+            createdproduct.fruitsVegetablesPercentage,
+            createdproduct.nutritional_value.carbohydrates.dietry_fibre
+          )
+
+
+
+
+    const rating=await productrating.create({
+    
+        product_id:createdproduct._id,
+        product_finalscore:finalScore,
+        product_nutriscore:nutriScore
+
+
+      
+    })
+
+
+
+    return res.status(201).json(
+        new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+        // new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+    )
+
+})
+
+
+
+
+
+
 const registerproduct = asynchandler(async (req,res)=>{
    
 
@@ -248,8 +346,8 @@ const registerproduct = asynchandler(async (req,res)=>{
         nutriScore
           }= calculateNutriScore(
             createdproduct.nutritional_value.energy,
-            createdproduct.nutritional_value.carbohydrates.total_sugar,   
-            createdproduct.nutritional_value.total_fat.saturates_fats,  
+            createdproduct.nutritional_value.total_carbohydrates,   
+            createdproduct.nutritional_value.fats.saturates_fats,  
             createdproduct.nutritional_value.protein,   
             createdproduct.nutritional_value.sodium,
             createdproduct.fruitsVegetablesPercentage,
@@ -282,6 +380,9 @@ const registerproduct = asynchandler(async (req,res)=>{
     )
 
 })
+
+
+
 
 
 
@@ -724,6 +825,7 @@ const allproducts = asynchandler(async (req,res)=>{
               product_barcode: 1,
               product_name:1,
               brand_name:1,
+              rank:1,
               product_category:1,
               product_front_image:1,
               fetchCount:1,
@@ -806,6 +908,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
               brand_name:1,
               product_category:1,
               product_front_image:1,
+              rank:1,
               fetchCount:1,
               product_finalscore: "$ratings.product_finalscore",
               product_nutriscore: "$ratings.product_nutriscore"
@@ -821,7 +924,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
           },
           {
             $sort: {
-              ratings: 1 // Sort by ratings in descending order (highest first)
+                product_finalscore: 1 // Sort by ratings in descending order (highest first)
             }
           }
         
@@ -1086,6 +1189,70 @@ const registeringredient = asynchandler(async (req,res)=>{
 
 
 
+const update_ingredient = asynchandler(async (req,res)=>{
+   
+
+
+
+    const {
+        name,
+        keywords,
+        purpose,
+        ingredients,
+        description
+    }= req.body
+    
+
+
+    const ingredient_data = await ingredient.findOne(
+        {
+            $or:[{name}]
+        }
+    )
+
+    if (!ingredient_data) {
+        throw new ApiError(409,"ingredient not registered")
+    }
+
+    
+
+    if (name) ingredient_data.name = name;
+    if (purpose) ingredient_data.purpose = purpose;
+    if (ingredients) ingredient_data.ingredients = ingredients;
+    if (description) ingredient_data.description = description;
+
+    // Merge new keywords with existing ones
+    if (keywords && keywords.length > 0) {
+        ingredient_data.keywords = [...new Set([...ingredient_data.keywords, ...keywords])];
+    }
+
+
+    await ingredient_data.save();
+
+    
+  
+
+    const result =await ingredient.findById( ingredient_data._id);    
+
+    // console.log
+    if (!result) {
+        throw new ApiError(500,"something went wrong while updating the ingredienrt")
+    }
+
+
+  
+
+    return res.status(201).json(
+        new ApiResponse(200,{result},"ingredient updated sucessfully")
+        // new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+    )
+
+})
+
+
+
+
+
 
 const searchingredient = asynchandler(async (req,res)=>{
 
@@ -1128,6 +1295,7 @@ export {
     categories,
     registeringredient,
     searchingredient,
-    product_ranking
+    product_ranking,
+    update_ingredient
   
 }

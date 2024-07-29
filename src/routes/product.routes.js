@@ -13,7 +13,8 @@ import {
     alternateproducts,
     registeringredient,
     searchingredient,
-    product_ranking
+    product_ranking,
+    update_ingredient
     
   
      } from "../controllers/product.controller.js";
@@ -33,6 +34,9 @@ router.route("/register").post(registerproduct)
 
 
 router.route("/register_ingredient").post(registeringredient)
+
+
+router.route("/update_ingredient").post(update_ingredient)
 
 
 router.route("/showproduct/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
