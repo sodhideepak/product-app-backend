@@ -614,8 +614,46 @@ const searchproduct = asynchandler(async (req,res)=>{
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "product_id",  // Ensure this field matches the field in likes collection
+                as: "isliked",
+                pipeline: [
+                    {
+                        $match: {
+                            likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+                isliked: {
+                    $cond: {
+                      if: {
+                        $gte: [
+                          {
+                            // if the isLiked key has document in it
+                            $size: "$isliked",
+                          },
+                          1,
+                        ],
+                      }, 
+                      then: true,
+                      else: false,
+                    },
+                  },
+                 
+            }
+        },
+        {
             $project: {
               likesCount: { $size: "$likes" },  
+              isliked:1,
               _id: 1,
               likesCount: 1,
               ratings: 1,
@@ -685,9 +723,47 @@ const most_scanned = asynchandler(async (req,res)=>{
            },
        },
        {
+        $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "product_id",  // Ensure this field matches the field in likes collection
+            as: "isliked",
+            pipeline: [
+                {
+                    $match: {
+                        likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                    },
+                },
+            ],
+        },
+    },
+    {
+        $addFields: {
+            likesCount: { $size: "$likes" },
+            ratings:  "$ratings" ,
+            isliked: {
+                $cond: {
+                  if: {
+                    $gte: [
+                      {
+                        // if the isLiked key has document in it
+                        $size: "$isliked",
+                      },
+                      1,
+                    ],
+                  }, 
+                  then: true,
+                  else: false,
+                },
+              },
+             
+        }
+    },
+       {
            $project: {
              _id: 1,
              likesCount: 1,
+             isliked:1,
              ratings: 1,
              likesCount: { $size: "$likes" },
              product_barcode: 1,
@@ -817,8 +893,46 @@ const allproducts = asynchandler(async (req,res)=>{
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "product_id",  // Ensure this field matches the field in likes collection
+                as: "isliked",
+                pipeline: [
+                    {
+                        $match: {
+                            likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+                isliked: {
+                    $cond: {
+                      if: {
+                        $gte: [
+                          {
+                            // if the isLiked key has document in it
+                            $size: "$isliked",
+                          },
+                          1,
+                        ],
+                      }, 
+                      then: true,
+                      else: false,
+                    },
+                  },
+                 
+            }
+        },
+        {
             $project: {
               likesCount: { $size: "$likes" },  
+              isliked:1,
               _id: 1,
               likesCount: 1,
               ratings: 1,
@@ -901,9 +1015,47 @@ const alternateproducts = asynchandler(async (req,res)=>{
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "product_id",  // Ensure this field matches the field in likes collection
+                as: "isliked",
+                pipeline: [
+                    {
+                        $match: {
+                            likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+                isliked: {
+                    $cond: {
+                      if: {
+                        $gte: [
+                          {
+                            // if the isLiked key has document in it
+                            $size: "$isliked",
+                          },
+                          1,
+                        ],
+                      }, 
+                      then: true,
+                      else: false,
+                    },
+                  },
+                 
+            }
+        },
+        {
             $project: {
               _id: 1,
-              likesCount: { $size: "$likes" },
+              isliked:1,
+              likesCount: { $size: "$likes" }, 
               product_barcode: 1,
               product_name:1,
               brand_name:1,
