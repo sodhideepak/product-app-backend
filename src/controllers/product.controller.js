@@ -569,15 +569,15 @@ const showproduct = asynchandler(async (req,res)=>{
 const searchproduct = asynchandler(async (req,res)=>{
 
     
-    console.log(req.query )
+    // console.log(req.query )
 
     // const product_data = await product.find( req.query )
 
     const query = req.query
-    
+    // console.log(query);
 
     const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
-
+    // console.log(search);
         // Match conditions for regex search on product name and keywords
         const matchConditions = search ? {
             $or: [
@@ -622,6 +622,7 @@ const searchproduct = asynchandler(async (req,res)=>{
               product_barcode: 1,
               product_name:1,
               brand_name:1,
+              rank:1,
               product_category:1,
               product_front_image:1,
               fetchCount:1,
@@ -739,8 +740,8 @@ const product_ranking = asynchandler(async (req,res)=>{
     
     const categories = await product.distinct("product_category");
 
-    console.log(categories);
-  // Iterate through each category and rank the top 20 products
+    // console.log(categories);
+  // Iterate through each category and rank the top 20 products 
 
 for (const category of categories) {
     const topProducts = await product.aggregate([
@@ -760,7 +761,7 @@ for (const category of categories) {
         { $limit: 20 }
       ]);
     
-    console.log(topProducts)
+    // console.log(topProducts)
       // Assign ranks
        for (let i = 0; i < topProducts.length; i++) {
         topProducts[i].rank = i + 1;
@@ -780,7 +781,6 @@ for (const category of categories) {
     )
 
 })
-
 
 
 
@@ -868,6 +868,7 @@ const allproducts = asynchandler(async (req,res)=>{
 
 
 
+
 const alternateproducts = asynchandler(async (req,res)=>{
 
    
@@ -909,6 +910,8 @@ const alternateproducts = asynchandler(async (req,res)=>{
               product_category:1,
               product_front_image:1,
               rank:1,
+              price:1,
+              ingredients:1,
               fetchCount:1,
               product_finalscore: "$ratings.product_finalscore",
               product_nutriscore: "$ratings.product_nutriscore"
@@ -946,6 +949,8 @@ const alternateproducts = asynchandler(async (req,res)=>{
     )
 
 })
+
+
 
 
 const updateproductimages = asynchandler(async(req,res)=>{
@@ -1042,6 +1047,8 @@ const updateproductimages = asynchandler(async(req,res)=>{
 })
 
 
+
+
 const update_product_rating = asynchandler(async(req,res)=>{
 
     // const password=req.query
@@ -1130,7 +1137,6 @@ const categories = asynchandler(async (req,res)=>{
 
 
 
-
 const registeringredient = asynchandler(async (req,res)=>{
    
 
@@ -1186,6 +1192,7 @@ const registeringredient = asynchandler(async (req,res)=>{
     )
 
 })
+
 
 
 
@@ -1280,6 +1287,7 @@ const searchingredient = asynchandler(async (req,res)=>{
     )
 
 })
+
 
 
 
