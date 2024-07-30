@@ -49,7 +49,7 @@ router.route("/most_scanned").get(getLoggedInUserOrIgnore,most_scanned)
 router.route("/allproducts").get(getLoggedInUserOrIgnore,allproducts)
 
 
-router.route("/alternateproducts").get(getLoggedInUserOrIgnore,alternateproducts)
+router.route("/alternateproducts/:category").get(getLoggedInUserOrIgnore,alternateproducts)
 
 
 router.route("/categories").get(categories)
