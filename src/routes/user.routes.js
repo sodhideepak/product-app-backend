@@ -63,7 +63,7 @@ router.route("/resetpassword").post(resetpassword)
 
 
 
-router.route("/consumedproducts").get(verifyJWT,consumed_products)
+router.route("/consumedproducts/:condition").get(verifyJWT,consumed_products)
 
 
 export default router 

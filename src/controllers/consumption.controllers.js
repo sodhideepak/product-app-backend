@@ -5,6 +5,7 @@ import { consumption } from "../models/consumption.model.js";
 import { product } from "../models/product.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import moment from "moment-timezone";
 
 
 
@@ -93,7 +94,9 @@ const ConsumeProduct = asynchandler(async (req, res) => {
 
     const {current_date,current_time} = getCurrentISTDateTime();
       
-  
+
+  // const current_date = "27/07/2024"
+  // const current_time = "12:30:19 am"
 
   
     const data=await consumption.create({  
@@ -153,7 +156,14 @@ const consumed_products = asynchandler(async (req, res) => {
   const  User  = req.user;
   const  Userid  = User._id;
 
+  const { condition } = req.params;
+
+  console.log(condition);
+
   console.log(Userid);
+
+  console.log( moment().startOf('month').toDate(),
+   moment().endOf('month').toDate());
   // const comment = await SocialComment.findById(commentId);
 
   // Check for comment existence
@@ -161,58 +171,163 @@ const consumed_products = asynchandler(async (req, res) => {
   //   throw new ApiError(404, "Comment does not exist");
   // }
   // console.log(Userid)
-  const products_data = await consumption.aggregate([
-      { $match:
-          {consumed_By:new mongoose.Types.ObjectId(Userid)} 
-      }, // Match products based on the query parameters
+  // const products_data = await consumption.aggregate([
+  //     { $match:
+  //         {consumed_By:new mongoose.Types.ObjectId(Userid)} 
+  //     }, // Match products based on the query parameters
       
-      { 
-          $lookup: {
-              from: 'producttts', // Name of the ratings collection
-              localField: 'product_id',
-              foreignField: '_id', // Adjust the field name if necessary
-              as: 'consumed_products',
+  //     { 
+  //         $lookup: {
+  //             from: 'producttts', // Name of the ratings collection
+  //             localField: 'product_id',
+  //             foreignField: '_id', // Adjust the field name if necessary
+  //             as: 'consumed_products',
              
-            }
-      },
-      {
-        $lookup: {
-            from: 'productratings', // Name of the ratings collection
-            localField: 'product_id',
-            foreignField: 'product_id', // Adjust the field name if necessary
-            as: 'ratings'
-        }
-    },
-    {
-      $unwind: '$ratings'
-    },
-    {
-      $unwind: '$consumed_products'
-    },
-    {
-          $project: {
-            consumed_By: 1, // Exclude the _id field from the result
-            consumed_At_date: 1, // Exclude the _id field from the result
-            consumed_At_time: 1, // Exclude the _id field from the result
-            'consumed_products.product_barcode': 1,
-            'consumed_products.product_name': 1,
-            'consumed_products.brand_name': 1,
-            'consumed_products.product_front_image': 1,
-            'consumed_products.product_category': 1,
-            'ratings.product_finalscore':1,
-            'ratings.product_nutriscore':1
-          }
-    }
+  //           }
+  //     },
+  //     {
+  //       $lookup: {
+  //           from: 'productratings', // Name of the ratings collection
+  //           localField: 'product_id',
+  //           foreignField: 'product_id', // Adjust the field name if necessary
+  //           as: 'ratings'
+  //       }
+  //   },
+  //   {
+  //     $unwind: '$ratings'
+  //   },
+  //   {
+  //     $unwind: '$consumed_products'
+  //   },
+  //   {
+  //         $project: {
+  //           consumed_By: 1, // Exclude the _id field from the result
+  //           consumed_At_date: 1, // Exclude the _id field from the result
+  //           consumed_At_time: 1, // Exclude the _id field from the result
+  //           'consumed_products.product_barcode': 1,
+  //           'consumed_products.product_name': 1,
+  //           'consumed_products.brand_name': 1,
+  //           'consumed_products.product_front_image': 1,
+  //           'consumed_products.product_category': 1,
+  //           'ratings.product_finalscore':1,
+  //           'ratings.product_nutriscore':1
+  //         }
+  //   }
           
-  ]);
+  // ]);
 
+
+
+  const products_data = await consumption.aggregate([
+    { $match: { consumed_By: new mongoose.Types.ObjectId(Userid) } }, // Match products based on the query parameters
+    
+    { 
+      $lookup: {
+        from: 'producttts', // Name of the products collection
+        localField: 'product_id',
+        foreignField: '_id', // Adjust the field name if necessary
+        as: 'consumed_products'
+      }
+    },
+    {
+      $lookup: {
+        from: 'productratings', // Name of the ratings collection
+        localField: 'product_id',
+        foreignField: 'product_id', // Adjust the field name if necessary
+        as: 'ratings'
+      }
+    },
+    { $unwind: '$ratings' },
+    { $unwind: '$consumed_products' },
+    {
+      $addFields: {
+        consumed_At_date_converted: {
+          $dateFromString: {
+            dateString: '$consumed_At_date',
+            format: '%d/%m/%Y', // Adjust format according to your date string format
+            onError: new Date(0) // Default value in case of conversion error
+          }
+        }
+      }
+    },
+    {
+      $addFields: {
+        isToday: {
+          $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().format("YYYY-MM-DD")]
+        },
+        isYesterday: {
+          $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().subtract(1, 'day').format("YYYY-MM-DD")]
+        },
+        isThisWeek: {
+          $and: [
+            { $gte: ["$consumed_At_date_converted", moment().startOf('week').toDate()] },
+            { $lte: ["$consumed_At_date_converted", moment().endOf('week').toDate()] }
+          ]
+        },
+        ispreviousWeek: {
+          $and: [
+            { $gte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').startOf('week').toDate()] },
+            { $lte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').endOf('week').toDate()] }
+          ]
+        },
+        isThisMonth: {
+          $and: [
+            { $gte: ["$consumed_At_date_converted", moment().startOf('month').toDate()] },
+            { $lte: ["$consumed_At_date_converted", moment().endOf('month').toDate()] }
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        consumed_By: 1,
+        consumed_At_date: 1,
+        consumed_At_time: 1,
+        consumed_At_date_converted:1,
+        'consumed_products.product_barcode': 1,
+        'consumed_products.product_name': 1,
+        'consumed_products.brand_name': 1,
+        'consumed_products.product_front_image': 1,
+        'consumed_products.product_category': 1,
+        'ratings.product_finalscore': 1,
+        'ratings.product_nutriscore': 1,
+        isToday: 1,
+        isYesterday: 1,
+        isThisWeek: 1,
+        ispreviousWeek:1,
+        isThisMonth: 1
+      }
+    }
+  ]);
+  
+  // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
+  let filteredData;
+  switch (condition) {
+    case 'today':
+      filteredData = products_data.filter(item => item.isToday);
+      break;
+    case 'yesterday':
+      filteredData = products_data.filter(item => item.isYesterday);
+      break;
+    case 'week':
+      filteredData = products_data.filter(item => item.isThisWeek);
+      break;
+    case 'previousweek':
+      filteredData = products_data.filter(item => item.ispreviousWeek);
+      break;
+    case 'month':
+      filteredData = products_data.filter(item => item.isThisMonth);
+      break;
+    default:
+      filteredData = products_data; // Return all data if no specific condition is given
+  }
 
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          products_data,
+          filteredData,
         },
         "products fetched sucessfully"
       )
