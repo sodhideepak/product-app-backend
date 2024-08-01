@@ -660,6 +660,8 @@ const searchproduct = asynchandler(async (req,res)=>{
               product_barcode: 1,
               product_name:1,
               brand_name:1,
+              price:1,
+              ingredients:1,
               rank:1,
               product_category:1,
               product_front_image:1,
