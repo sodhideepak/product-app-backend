@@ -317,8 +317,8 @@ const registerproduct = asynchandler(async (req,res)=>{
         dietry_fiber:dietry_fiber||0,
         // product_finalscore:finalScore,
         // product_nutriscore:nutriScore,
-        product_front_image:"",
-        product_back_image:""
+        product_front_image:"https://res.cloudinary.com/ddvloqbxp/image/upload/v1722503720/qqj7pkvbtaxsdurfen7c.png",
+        product_back_image:"https://res.cloudinary.com/ddvloqbxp/image/upload/v1722503720/qqj7pkvbtaxsdurfen7c.png"
 
 
     })
