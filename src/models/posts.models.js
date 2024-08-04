@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 
 
 
-const blogschema= new mongoose.Schema({
+const postschema= new mongoose.Schema({
     content:{
         type: String,
         require:true,   
@@ -23,4 +23,4 @@ const blogschema= new mongoose.Schema({
 )
 
 
-export const blog = mongoose.model("blog", blogschema)     
+export const posts = mongoose.model("posts", postschema)     

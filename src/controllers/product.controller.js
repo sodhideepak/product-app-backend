@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { product } from "../models/product.models.js";
 import { user } from "../models/user.models.js";
 import { productrating } from "../models/productrating.models.js";
-import { ingredient } from "../models/ingredient.model.js";
+import { ingredient } from "../models/ingredient.models.js";
 import mongoose from "mongoose";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -382,6 +382,43 @@ const registerproduct = asynchandler(async (req,res)=>{
 })
 
 
+
+
+
+const checkbarcode = asynchandler(async (req,res)=>{
+
+    console.log(req.params)
+    const {product_barcode}= req.params
+
+    if (!product_barcode) {
+        throw new ApiError(400,"barcode is required")     
+    }
+
+    const fetched_product= await product.findOne({
+        $or:[ {product_barcode}]
+    })
+    let product_data;
+    
+    // console.log(fetched_product)
+    if (!fetched_product) {
+        product_data=Boolean(0)
+    }else{
+        product_data=Boolean(1)
+    }
+    
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                product_data
+            },
+            "product fetched sucessfully")
+    )
+
+})
 
 
 
@@ -1459,6 +1496,7 @@ export {
     registeringredient,
     searchingredient,
     product_ranking,
-    update_ingredient
+    update_ingredient,
+    checkbarcode
   
 }

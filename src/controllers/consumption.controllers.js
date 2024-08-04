@@ -1,7 +1,7 @@
 import { asynchandler } from "../utils/asynchandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import { like} from "../models/likes.model.js";
-import { consumption } from "../models/consumption.model.js";
+import { like} from "../models/likes.models.js";
+import { consumption } from "../models/consumption.models.js";
 import { product } from "../models/product.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";

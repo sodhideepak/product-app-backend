@@ -6,11 +6,22 @@ import { Int32 } from "mongodb";
 const likeschema= new mongoose.Schema({
     product_id:{
         type: Schema.Types.ObjectId,
-        ref: "product_data",   
+        ref: "product",   
+        default: null,
+    },
+    blog_id:{
+        type: Schema.Types.ObjectId,
+        ref: "blog",   
+        default: null,
+    }, 
+    comment_id:{
+        type: Schema.Types.ObjectId,
+        ref: "blog",   
+        default: null,
     },
     likedBy: {
         type: Schema.Types.ObjectId,
-        ref: "user"
+        ref: "user",
       }
     },
     {timestamps:true}
