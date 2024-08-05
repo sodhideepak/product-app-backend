@@ -387,7 +387,7 @@ const registerproduct = asynchandler(async (req,res)=>{
 
 const checkbarcode = asynchandler(async (req,res)=>{
 
-    console.log(req.params)
+    // console.log(req.params)
     const {product_barcode}= req.params
 
     if (!product_barcode) {

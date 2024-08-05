@@ -287,6 +287,7 @@ const consumed_products = asynchandler(async (req, res) => {
         'consumed_products.product_barcode': 1,
         'consumed_products.product_name': 1,
         'consumed_products.brand_name': 1,
+        'consumed_products.nutritional_value': 1,
         'consumed_products.product_front_image': 1,
         'consumed_products.product_category': 1,
         'ratings.product_finalscore': 1,
@@ -295,39 +296,102 @@ const consumed_products = asynchandler(async (req, res) => {
         isYesterday: 1,
         isThisWeek: 1,
         ispreviousWeek:1,
-        isThisMonth: 1
+        isThisMonth: 1,
       }
     }
   ]);
   
   // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
-  let filteredData;
+  let consumedproductdata;
   switch (condition) {
     case 'today':
-      filteredData = products_data.filter(item => item.isToday);
+      consumedproductdata = products_data.filter(item => item.isToday);
       break;
     case 'yesterday':
-      filteredData = products_data.filter(item => item.isYesterday);
+      consumedproductdata = products_data.filter(item => item.isYesterday);
       break;
     case 'week':
-      filteredData = products_data.filter(item => item.isThisWeek);
+      consumedproductdata = products_data.filter(item => item.isThisWeek);
       break;
     case 'previousweek':
-      filteredData = products_data.filter(item => item.ispreviousWeek);
+      consumedproductdata = products_data.filter(item => item.ispreviousWeek);
       break;
     case 'month':
-      filteredData = products_data.filter(item => item.isThisMonth);
+      consumedproductdata = products_data.filter(item => item.isThisMonth);
       break;
     default:
-      filteredData = products_data; // Return all data if no specific condition is given
+      consumedproductdata = products_data; // Return all data if no specific condition is given
   }
+
+
+  const sumNutritionalValues = (data, filterFn) => {
+    return data.filter(filterFn).reduce((acc, item) => {
+      const nutritionalValue = item.consumed_products.nutritional_value;
+      
+      const sumNestedValues = (obj) => {
+        return Object.values(obj).reduce((sum, value) => {
+          if (typeof value === 'object') {
+            return sum + sumNestedValues(value);
+          }
+          return sum + value;
+        }, 0);
+      };
+  
+      Object.keys(nutritionalValue).forEach(key => {
+        if (typeof nutritionalValue[key] === 'object') {
+          acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key]);
+        } else {
+          acc[key] = (acc[key] || 0) + nutritionalValue[key];
+        }
+      });
+      return acc;
+    }, {});
+  };
+
+  let nutritionalvaluesum;
+  switch (condition) {
+    case 'today':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isToday);
+      break;
+    case 'yesterday':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isYesterday);
+      break;
+    case 'week':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisWeek);
+      break;
+    case 'previousweek':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.ispreviousWeek);
+      break;
+    case 'month':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisMonth);
+      break;
+    default:
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isToday);
+  }
+
+
+
+  const response = consumedproductdata.map(item => ({
+    _id: item._id,
+    consumed_By: item.consumed_By,
+    consumed_At_date: item.consumed_At_date,
+    consumed_At_time: item.consumed_At_time,
+    consumed_products: {
+      product_barcode: item.consumed_products.product_barcode,
+      product_name: item.consumed_products.product_name,
+      brand_name: item.consumed_products.brand_name,
+      product_category: item.consumed_products.product_category,
+      product_front_image: item.consumed_products.product_front_image
+    }
+
+  }));
 
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          filteredData,
+          response,nutritionalvaluesum
         },
         "products fetched sucessfully"
       )
