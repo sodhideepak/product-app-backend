@@ -15,6 +15,9 @@ const consumptionschema= new mongoose.Schema({
     consumed_At_date: {
         type: String,
     },
+    serving_size: {
+        type: Number,
+    },
     consumed_At_time: {
         type: String,
         

@@ -10,6 +10,58 @@ import moment from "moment-timezone";
 
 
 
+
+// const moment = require('moment');
+
+// function getWeeksInCurrentMonth() {
+//   const today = moment();
+//   const currentMonth = today.month();
+//   const firstDayOfMonth = today.clone().startOf('month');
+//   const lastDayOfMonth = today.clone().endOf('month');
+
+//   const weeks = [];
+//   let currentWeekStart = firstDayOfMonth.clone().startOf('week');
+
+//   while (currentWeekStart.isBefore(lastDayOfMonth)) {
+//     const currentWeekEnd = currentWeekStart.clone().endOf('week');
+
+//     // Exclude dates from the previous month
+//     if (currentWeekStart.month() === currentMonth) {
+//       weeks.push({
+//         start: currentWeekStart.format('YYYY-MM-DD'),
+//         end: currentWeekEnd.format('YYYY-MM-DD'),
+//       });
+//     }
+
+//     currentWeekStart.add(1, 'week');
+//   }
+
+//   return weeks;
+// }
+
+// // Example usage:
+// const weeksInCurrentMonth = getWeeksInCurrentMonth();
+// console.log(weeksInCurrentMonth);
+
+const weeks = [];
+for (let week = 0; week < 4; week++) {
+  const daysOfWeek = [];
+  for (let i = 0; i < 7; i++) {
+    daysOfWeek.push({
+      date: moment().startOf('week').subtract(week, 'weeks').add(i, 'days').format('YYYY-MM-DD'),
+      products: []
+    });
+  }
+  weeks.push({
+    week: week === 0 ? 'Current Week' : `Week ${week}`,
+    days: daysOfWeek
+  });
+}
+
+console.log(weeks);
+
+
+
 function getCurrentISTDateTime() {
   // Get the current timestamp
   const timestamp = Date.now();
@@ -81,6 +133,8 @@ console.log(current_date);
 
 const ConsumeProduct = asynchandler(async (req, res) => {
     const { product_barcode } = req.params;
+
+    const {serving_size}= req.body;
   
     const product_data = await product.findOne({
         $or:[ {product_barcode}]
@@ -104,6 +158,7 @@ const ConsumeProduct = asynchandler(async (req, res) => {
         consumed_By:req.user._id,
         consumed_At_date:current_date,
         consumed_At_time:current_time,
+        serving_size
     })
 
 
@@ -158,12 +213,12 @@ const consumed_products = asynchandler(async (req, res) => {
 
   const { condition } = req.params;
 
-  console.log(condition);
+  // console.log(condition);
 
-  console.log(Userid);
+  // console.log(Userid);
 
-  console.log( moment().startOf('month').toDate(),
-   moment().endOf('month').toDate());
+  // console.log( moment().startOf('month').toDate(),
+  //  moment().endOf('month').toDate());
   // const comment = await SocialComment.findById(commentId);
 
   // Check for comment existence
@@ -255,19 +310,28 @@ const consumed_products = asynchandler(async (req, res) => {
         isToday: {
           $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().format("YYYY-MM-DD")]
         },
-        isYesterday: {
-          $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().subtract(1, 'day').format("YYYY-MM-DD")]
-        },
         isThisWeek: {
           $and: [
             { $gte: ["$consumed_At_date_converted", moment().startOf('week').toDate()] },
             { $lte: ["$consumed_At_date_converted", moment().endOf('week').toDate()] }
           ]
         },
-        ispreviousWeek: {
+        isLastWeek: {
           $and: [
             { $gte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').startOf('week').toDate()] },
             { $lte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').endOf('week').toDate()] }
+          ]
+        },
+        isThirdLastWeek: {
+          $and: [
+            { $gte: ["$consumed_At_date_converted", moment().subtract(2, 'weeks').startOf('week').toDate()] },
+            { $lte: ["$consumed_At_date_converted", moment().subtract(2, 'weeks').endOf('week').toDate()] }
+          ]
+        },
+        isFourthLastWeek: {
+          $and: [
+            { $gte: ["$consumed_At_date_converted", moment().subtract(3, 'weeks').startOf('week').toDate()] },
+            { $lte: ["$consumed_At_date_converted", moment().subtract(3, 'weeks').endOf('week').toDate()] }
           ]
         },
         isThisMonth: {
@@ -284,6 +348,7 @@ const consumed_products = asynchandler(async (req, res) => {
         consumed_At_date: 1,
         consumed_At_time: 1,
         consumed_At_date_converted:1,
+        serving_size:1,
         'consumed_products.product_barcode': 1,
         'consumed_products.product_name': 1,
         'consumed_products.brand_name': 1,
@@ -293,9 +358,10 @@ const consumed_products = asynchandler(async (req, res) => {
         'ratings.product_finalscore': 1,
         'ratings.product_nutriscore': 1,
         isToday: 1,
-        isYesterday: 1,
         isThisWeek: 1,
-        ispreviousWeek:1,
+        isLastWeek:1,
+        isThirdLastWeek: 1,
+        isFourthLastWeek:1,
         isThisMonth: 1,
       }
     }
@@ -303,75 +369,136 @@ const consumed_products = asynchandler(async (req, res) => {
   
   // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
   let consumedproductdata;
+  let totalproductconsumed;
   switch (condition) {
     case 'today':
       consumedproductdata = products_data.filter(item => item.isToday);
+      totalproductconsumed = consumedproductdata.length;
       break;
     case 'yesterday':
       consumedproductdata = products_data.filter(item => item.isYesterday);
+      totalproductconsumed = consumedproductdata.length;
       break;
-    case 'week':
+    case 'currentweek':
       consumedproductdata = products_data.filter(item => item.isThisWeek);
+      totalproductconsumed = consumedproductdata.length;
       break;
-    case 'previousweek':
-      consumedproductdata = products_data.filter(item => item.ispreviousWeek);
+    case 'lastweek':
+      consumedproductdata = products_data.filter(item => item.isLastWeek);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    case 'thirdlastweek':
+      consumedproductdata = products_data.filter(item => item.isThirdLastWeek);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    case 'fourthlastweek':
+      consumedproductdata = products_data.filter(item => item.isFourthLastWeek);
+      totalproductconsumed = consumedproductdata.length;
       break;
     case 'month':
       consumedproductdata = products_data.filter(item => item.isThisMonth);
+      totalproductconsumed = consumedproductdata.length;
       break;
     default:
       consumedproductdata = products_data; // Return all data if no specific condition is given
+      totalproductconsumed = consumedproductdata.length;
   }
 
 
-  const sumNutritionalValues = (data, filterFn) => {
-    return data.filter(filterFn).reduce((acc, item) => {
-      const nutritionalValue = item.consumed_products.nutritional_value;
+  // const sumNutritionalValues = (data, filterFn) => {
+  //   return data.filter(filterFn).reduce((acc, item) => {
+  //     const nutritionalValue = item.consumed_products.nutritional_value;
       
-      const sumNestedValues = (obj) => {
-        return Object.values(obj).reduce((sum, value) => {
-          if (typeof value === 'object') {
-            return sum + sumNestedValues(value);
-          }
-          return sum + value;
-        }, 0);
-      };
+  //     const sumNestedValues = (obj) => {
+  //       return Object.values(obj).reduce((sum, value) => {
+  //         if (typeof value === 'object') {
+  //           return sum + sumNestedValues(value);
+  //         }
+  //         return sum + value;
+  //       }, 0);
+  //     };
   
-      Object.keys(nutritionalValue).forEach(key => {
-        if (typeof nutritionalValue[key] === 'object') {
-          acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key]);
-        } else {
-          acc[key] = (acc[key] || 0) + nutritionalValue[key];
+  //     Object.keys(nutritionalValue).forEach(key => {
+  //       if (typeof nutritionalValue[key] === 'object') {
+  //         acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key]);
+  //       } else {
+  //         acc[key] = (acc[key] || 0) + nutritionalValue[key];
+  //       }
+  //     });
+  //     return acc;
+  //   }, {});
+  // };
+
+
+
+
+
+  const sumNutritionalValues = (data, filterFn) => {
+    const sumNestedValues = (obj, servingSize) => {
+      return Object.values(obj).reduce((sum, value) => {
+        if (typeof value === 'object') {
+          return sum + sumNestedValues(value, servingSize);
         }
-      });
+        return sum + (value * servingSize / 100);
+      }, 0);
+    };
+  
+    return data.filter(filterFn).reduce((acc, item) => {
+      const products = item.consumed_products;
+      console.log(products);
+  console.log();
+      if (Array.isArray(products)) {
+        products.forEach(product => {
+          const nutritionalValue = product.nutritional_value;
+          const servingSize = product.serving_size;
+  
+          Object.keys(nutritionalValue).forEach(key => {
+            if (typeof nutritionalValue[key] === 'object') {
+              acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key], servingSize);
+            } else {
+              acc[key] = (acc[key] || 0) + (nutritionalValue[key] * servingSize / 100);
+            }
+          });
+        });
+      } else {
+        console.error('consumed_products is not an array:', products);
+      }
+  
       return acc;
     }, {});
   };
-
+  
+  
+  // console.log(sumNutritionalValues);
+  
+  
+console.log("hello",products_data.serving_size);
+// console.log(products_data);
+// console.log(consumedproductdata);
   let nutritionalvaluesum;
   switch (condition) {
     case 'today':
       nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isToday);
-      break;
-    case 'yesterday':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isYesterday);
-      break;
-    case 'week':
+      break; 
+    case 'currentweek':
       nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisWeek);
       break;
-    case 'previousweek':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.ispreviousWeek);
+    case 'lastweek':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isLastWeek);
       break;
-    case 'month':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisMonth);
+    case 'thirdlastweek':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThirdLastWeek);
+      break;
+    case 'fourthlastweek':
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isFourthLastWeek);
       break;
     default:
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isToday);
+      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisWeek);
   }
 
 
 
-  const response = consumedproductdata.map(item => ({
+  let response = consumedproductdata.map(item => ({
     _id: item._id,
     consumed_By: item.consumed_By,
     consumed_At_date: item.consumed_At_date,
@@ -386,12 +513,97 @@ const consumed_products = asynchandler(async (req, res) => {
 
   }));
 
+  const initializeWeekData = (condition) => {
+    const daysOfWeek = [];
+    // console.log(condition);
+  
+    switch (condition) {
+      case 'currentWeek':
+        for (let i = 0; i < 7; i++) {
+          daysOfWeek.push({
+            date: moment().startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            products: []
+          });
+        }
+        break;
+      case 'lastweek':
+        for (let i = 0; i < 7; i++) {
+          daysOfWeek.push({
+            date: moment().subtract(1, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            products: []
+          });
+        }
+        break;
+      case 'thirdlastweek':
+        for (let i = 0; i < 7; i++) {
+          daysOfWeek.push({
+            date: moment().subtract(2, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            products: []
+          });
+        }
+        break;
+        case 'fourthlastweek':
+          for (let i = 0; i < 7; i++) {
+            daysOfWeek.push({
+              date: moment().subtract(3, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+              products: []
+            });
+          }
+          break;
+      default:
+        for (let i = 0; i < 7; i++) {
+          daysOfWeek.push({
+            date: moment().startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            products: []
+          });
+        }
+        break;
+    }
+  
+    return daysOfWeek;
+  };
+  
+
+
+  const weekData = initializeWeekData(condition);
+  // console.log(weekData);
+
+
+
+consumedproductdata.forEach(product => {
+  const consumedDate = moment(product.consumed_At_date_converted).format('YYYY-MM-DD');
+  const dayIndex = weekData.findIndex(day => day.date === consumedDate);
+  
+  if (dayIndex !== -1) {
+    weekData[dayIndex].products.push({
+      _id: product._id,
+      consumed_By: product.consumed_By,
+      consumed_At_date: product.consumed_At_date,
+      consumed_At_time: product.consumed_At_time,
+      serving_size:product.serving_size,
+      consumed_products: {
+        product_barcode: product.consumed_products.product_barcode,
+        product_name: product.consumed_products.product_name,
+        brand_name: product.consumed_products.brand_name,
+        product_category: product.consumed_products.product_category,
+        product_front_image: product.consumed_products.product_front_image
+      },
+      ratings: product.ratings,
+
+    });
+  }
+});
+
+
+// console.log('Week Data:', products_data);
+// console.log('Week Data:', products_data.length);
+
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          response,nutritionalvaluesum
+          weekData,nutritionalvaluesum,totalproductconsumed
         },
         "products fetched sucessfully"
       )

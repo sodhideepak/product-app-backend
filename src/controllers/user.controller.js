@@ -184,10 +184,10 @@ const calculate_age = function calculateAge(dob) {
 const registeruser = asynchandler(async (req,res)=>{
     
     
-    const {fullname,email,phone_number,DOB,password}= req.body
+    const {fullname,email,phone_number,gender,DOB,password}= req.body
     
 
-    if([fullname,email,phone_number,password,DOB].some((field)=> field?.trim()==="")) {
+    if([fullname,email,phone_number,gender,password,DOB].some((field)=> field?.trim()==="")) {
         throw new ApiError(400,"all fields are required")
     }
     const existeduser = await user.findOne(
@@ -207,6 +207,7 @@ const registeruser = asynchandler(async (req,res)=>{
         fullname,
         email,
         DOB,
+        gender,
         password,
         phone_number,
         is_email_verified:0,
@@ -482,7 +483,7 @@ const getCurrentuser =asynchandler(async(req,res)=>{
 
 const updateAccountDetails =asynchandler(async(req,res)=>{
 
-    const {fullname,email,phone_number,DOB}=req.body
+    const {fullname,email,gender,phone_number,DOB}=req.body
     const user_data = await user.findById(req.user._id)
 
     if(!fullname || !email){
@@ -502,6 +503,7 @@ const updateAccountDetails =asynchandler(async(req,res)=>{
                 email,
                 phone_number,
                 DOB,
+                gender,
                 is_email_verified
             },
            
