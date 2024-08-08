@@ -158,7 +158,7 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
 
   
 const remove_post = asynchandler(async (req, res) => {
-  const { _id } = req.params;
+  const { _id } = req.body;
 
   const deletedPost = await posts.findByIdAndDelete(_id);
 
