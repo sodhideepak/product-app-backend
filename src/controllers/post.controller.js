@@ -4,6 +4,7 @@ import { like} from "../models/likes.models.js";
 import { posts } from "../models/post.models.js";
 import { consumption } from "../models/consumption.models.js";
 import { product } from "../models/product.models.js";
+import { bookmark } from "../models/bookmark.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
@@ -117,8 +118,8 @@ const createpost = asynchandler(async(req, res) => {
 
 const updatefeatureimage= asynchandler(async(req,res)=>{
     const {_id}=req.body
-    // console.log(_id)
-    // console.log(req.files)
+    console.log(_id)
+    console.log(req.files)
 
     let Post_data = await posts.findById(_id)
   
@@ -150,6 +151,8 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
           featureimage.url = featureimage.url.replace(/^http:/, 'https:');
 
           Post_data.featured_image=featureimage.url
+    }else{
+      throw new ApiError(500,"cannot access image")
     }
   
     
@@ -209,6 +212,60 @@ const remove_post = asynchandler(async(req, res) => {
 
 
 
+const bookmarkPost = asynchandler(async (req, res) => {
+  const { _id } = req.params;
+// console.log(_id);
+
+  const post = await posts.findById(_id);
+
+  // Check for post existence
+  if (!post) { 
+    throw new ApiError(404, "Post does not exist");
+  }
+
+  // See if user has already liked the post
+  const isAlreadyLiked = await bookmark.findOne({
+      post_id:post._id,
+      bookamrked_By: req.user?._id,
+  });
+
+  if (isAlreadyLiked) {
+    // if already liked, dislike it by removing the record from the DB
+    await bookmark.findOneAndDelete({
+      post_id:post._id,
+      bookamrked_By: req.user?._id,
+    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          isBookmarked: false,
+        },
+        "Unliked successfully"
+      )
+    );
+  } else {
+    // if not liked, like it by adding the record from the DB
+    await bookmark.create({
+      post_id:post._id,
+      bookamrked_By: req.user?._id,
+    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          isBookmarked: true,
+        },
+        "Liked successfully"
+      )
+    );
+  }
+});
+
+
+
+
+
 
 const allposts = asynchandler(async (req,res)=>{
 
@@ -245,6 +302,21 @@ const allposts = asynchandler(async (req,res)=>{
           },
       },
       {
+        $lookup: {
+            from: "bookmarks",
+            localField: "_id",
+            foreignField: "post_id",  // Ensure this field matches the field in likes collection
+            as: "isbookmarked",
+            pipeline: [
+                {
+                    $match: {
+                      bookamrked_By: new mongoose.Types.ObjectId(req.user?._id),
+                    },
+                },
+            ],
+        },
+      },
+      {
           $addFields: {
               likesCount: { $size: "$likes" },
               isliked: {
@@ -254,6 +326,21 @@ const allposts = asynchandler(async (req,res)=>{
                         {
                           // if the isLiked key has document in it
                           $size: "$isliked",
+                        },
+                        0,
+                      ],
+                    }, 
+                    then: true,
+                    else: false,
+                  },
+                },
+                isbookmarked: {
+                  $cond: {
+                    if: {
+                      $gte: [
+                        {
+                          // if the isLiked key has document in it
+                          $size: "$isbookmarked",
                         },
                         1,
                       ],
@@ -321,5 +408,6 @@ const allposts = asynchandler(async (req,res)=>{
   export { createpost, 
            updatefeatureimage,
            remove_post,
-           allposts
+           allposts,
+           bookmarkPost
           };

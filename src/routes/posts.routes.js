@@ -23,7 +23,8 @@ import {
 import { createpost, 
          updatefeatureimage,
          remove_post,
-         allposts 
+         allposts ,
+         bookmarkPost
 
 
 } from "../controllers/post.controller.js";
@@ -62,6 +63,9 @@ updatefeatureimage)
 
 
 router.route("/likeDislikePost/:_id").post(verifyJWT,likeDislikePost)
+
+
+router.route("/bookmarkPost/:_id").post(verifyJWT,bookmarkPost)
 
 
 

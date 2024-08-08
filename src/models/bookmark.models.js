@@ -3,23 +3,13 @@ import mongoose, { Schema } from "mongoose";
 import  Jwt  from "jsonwebtoken";
 import { Int32 } from "mongodb";
 // structure of the data to be stored in database
-const likeschema= new mongoose.Schema({
-    product_id:{
-        type: Schema.Types.ObjectId,
-        ref: "product",   
-        default: null,
-    },
+const bookmarkschema= new mongoose.Schema({
     post_id:{
         type: Schema.Types.ObjectId,
         ref: "blog",   
         default: null,
     }, 
-    comment_id:{
-        type: Schema.Types.ObjectId,
-        ref: "blog",   
-        default: null,
-    },
-    likedBy: {
+    bookamrked_By: {
         type: Schema.Types.ObjectId,
         ref: "user",
       }
@@ -28,4 +18,4 @@ const likeschema= new mongoose.Schema({
 )
 
 
-export const like = mongoose.model("like", likeschema)     
+export const bookmark = mongoose.model("bookmark", bookmarkschema)     
