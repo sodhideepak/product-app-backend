@@ -180,7 +180,7 @@ const remove_post = asynchandler(async(req, res) => {
  
  if (Post_data.featured_image!="") {
   await deleteFromCloudinary(Post_data.featured_image)
-  console.log("hellllllllll");
+  // console.log("hellllllllll");
   
  }
 
@@ -214,24 +214,13 @@ const allposts = asynchandler(async (req,res)=>{
 
     
     
-  const posts = await product.aggregate([
+  const posts_data = await posts.aggregate([
        // Match products based on the query parameters
-      {
-          $lookup: {
-              from: 'productratings', // Name of the ratings collection
-              localField: '_id',
-              foreignField: 'product_id', // Adjust the field name if necessary
-              as: 'ratings'
-          }
-      },
-      {
-          $unwind: '$ratings'
-      },
       {
           $lookup: {
             from: "likes",
             localField: "_id",
-            foreignField: "product_id",
+            foreignField: "post_id",
             as: "likes",
           },
       },
@@ -244,7 +233,7 @@ const allposts = asynchandler(async (req,res)=>{
           $lookup: {
               from: "likes",
               localField: "_id",
-              foreignField: "product_id",  // Ensure this field matches the field in likes collection
+              foreignField: "post_id",  // Ensure this field matches the field in likes collection
               as: "isliked",
               pipeline: [
                   {
@@ -258,7 +247,6 @@ const allposts = asynchandler(async (req,res)=>{
       {
           $addFields: {
               likesCount: { $size: "$likes" },
-              ratings:  "$ratings" ,
               isliked: {
                   $cond: {
                     if: {
@@ -277,35 +265,31 @@ const allposts = asynchandler(async (req,res)=>{
                
           }
       },
-      {
-          $project: {
-            likesCount: { $size: "$likes" },  
-            isliked:1,
-            _id: 1,
-            likesCount: 1,
-            ratings: 1,
-            product_barcode: 1,
-            product_name:1,
-            brand_name:1,
-            rank:1,
-            product_category:1,
-            product_front_image:1,
-            fetchCount:1,
-            product_finalscore: "$ratings.product_finalscore",
-            product_nutriscore: "$ratings.product_nutriscore"
+      // {
+      //     $project: {
+      //       likesCount: { $size: "$likes" },  
+      //       isliked:1,
+      //       _id: 1,
+      //       likesCount: 1,
+      //       ratings: 1,
+      //       product_barcode: 1,
+      //       product_name:1,
+      //       brand_name:1,
+      //       rank:1,
+      //       product_category:1,
+      //       product_front_image:1,
+      //       fetchCount:1,
+      //       product_finalscore: "$ratings.product_finalscore",
+      //       product_nutriscore: "$ratings.product_nutriscore"
 
-          }
-        },
+      //     }
+      //   },
         {
           $project:{
-              ratings:0
+              likes:0
           }
         },
-      //   {
-      //     $sort: {
-      //         fetchCount: -1 // Sort by ratings in descending order (highest first)
-      //     }
-      //   }
+   
       
 
   ])
@@ -321,7 +305,7 @@ const allposts = asynchandler(async (req,res)=>{
       new ApiResponse(
           200,
           
-          products
+          posts_data
           ,
           "products fetched sucessfully")
   )

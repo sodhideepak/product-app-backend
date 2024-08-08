@@ -1,6 +1,7 @@
 import { asynchandler } from "../utils/asynchandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { like} from "../models/likes.models.js";
+import { posts } from "../models/post.models.js";
 import { product } from "../models/product.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
@@ -59,6 +60,63 @@ const likeDislikeProduct = asynchandler(async (req, res) => {
     }
   });
   
+
+
+
+  
+
+const likeDislikePost = asynchandler(async (req, res) => {
+  const { _id } = req.params;
+console.log(_id);
+
+  const post = await posts.findById(_id);
+
+  // Check for post existence
+  if (!post) { 
+    throw new ApiError(404, "Post does not exist");
+  }
+
+  // See if user has already liked the post
+  const isAlreadyLiked = await like.findOne({
+      post_id:post._id,
+    likedBy: req.user?._id,
+  });
+
+  if (isAlreadyLiked) {
+    // if already liked, dislike it by removing the record from the DB
+    await like.findOneAndDelete({
+      post_id:post._id,
+      likedBy: req.user?._id,
+    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          isLiked: false,
+        },
+        "Unliked successfully"
+      )
+    );
+  } else {
+    // if not liked, like it by adding the record from the DB
+    await like.create({
+      post_id:post._id,
+      likedBy: req.user?._id,
+    });
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          isLiked: true,
+        },
+        "Liked successfully"
+      )
+    );
+  }
+});
+
+
+
   const liked_product = asynchandler(async (req, res) => {
     const  User  = req.user;
     const  Userid  = User._id;
@@ -126,4 +184,6 @@ const likeDislikeProduct = asynchandler(async (req, res) => {
     
   });
   
-  export { likeDislikeProduct, liked_product };
+  export { likeDislikeProduct, liked_product ,
+            likeDislikePost 
+  };

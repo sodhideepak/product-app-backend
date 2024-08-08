@@ -29,7 +29,8 @@ import { createpost,
 } from "../controllers/post.controller.js";
 import { 
     likeDislikeProduct,
-    liked_product
+    liked_product,
+    likeDislikePost
 
  } from "../controllers/likes.controllers.js";
 import { ConsumeProduct,Remove_From_Consumption } from "../controllers/consumption.controllers.js";
@@ -45,7 +46,7 @@ router.route("/create_post").post(createpost)
 router.route("/remove_post").post(remove_post)
 
 
-router.route("/all_posts").post(allposts)
+router.route("/all_posts").get(getLoggedInUserOrIgnore,allposts)
 
 
 
@@ -56,6 +57,12 @@ router.route("/updatefeatureimage").post( upload.fields([
     }
 ]),
 updatefeatureimage)
+
+
+
+
+router.route("/likeDislikePost/:_id").post(verifyJWT,likeDislikePost)
+
 
 
 router.route("/checkbarcode/:product_barcode").get(checkbarcode)
@@ -100,8 +107,6 @@ router.route("/RemoveConsumeProduct/:_id").post(verifyJWT,Remove_From_Consumptio
 
 
 
-
-router.route("/like-product/:product_barcode").post(verifyJWT,likeDislikeProduct)
 
 
 router.route("/liked_product").get(verifyJWT,liked_product)
