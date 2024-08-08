@@ -1,5 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-
+// import mongoose, { Schema } from "mongoose";
+import mongoose,{Schema} from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 
 
@@ -17,7 +18,7 @@ const postschema= new mongoose.Schema({
         require:true,   
     },
     tags:{
-        type: String 
+        type: Object 
     },
     author:{
         type: String,

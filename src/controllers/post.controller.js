@@ -5,7 +5,7 @@ import { posts } from "../models/post.models.js";
 import { consumption } from "../models/consumption.models.js";
 import { product } from "../models/product.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadoncloudinary } from "../utils/cloudinary.js";
+import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
 
@@ -56,7 +56,7 @@ function getCurrentISTDateTime() {
 
 
 
-const createpost = asynchandler(async (req, res) => {
+const createpost = asynchandler(async(req, res) => {
     const {
      title,
      content,
@@ -65,30 +65,36 @@ const createpost = asynchandler(async (req, res) => {
 
     }= req.body
   
-    if([title,content,featured_image,tags,author].some((field)=> field?.trim()==="")) {
-      throw new ApiError(400,"all fields are required")
-  }
+    // console.log(req.body);
+    
+    // console.log(title);
+    // console.log("eeeelllooo");
+    
+    if ([title, content].some((field) => {
+      console.log('Checking field:', field);
+      return field?.trim() === ""||undefined;
+    })) {
+      throw new ApiError(400, "All fields are required");
+    }
+    
   
 
     const {current_date,current_time} = getCurrentISTDateTime();
 
+// console.log(current_date,current_time);
 
 
-    featuredimagelocalpath =req.files?.product_back_image[0]?.path;
-
-    image =await uploadoncloudinary(productbackimagelocalpath);
-
-    image.url = productbackimage.url.replace(/^http:/, 'https:');
       
 
   
-    const data=await posts.create({  
+    const post_data=await posts.create({  
         title,
         content,
         tags,
         author:"heetox",
-        consumed_At_date:current_date,
-        consumed_At_time:current_time,
+        featured_image:"",
+        created_At_date:current_date,
+        created_At_time:current_time,
     })
 
 
@@ -98,9 +104,9 @@ const createpost = asynchandler(async (req, res) => {
         new ApiResponse(
           200,
           {
-            data,
+            post_data,
           },
-          "Product Added to Consumpton Sucessfully"
+          "Post Created Sucessfully"
         )
       );
     
@@ -111,8 +117,8 @@ const createpost = asynchandler(async (req, res) => {
 
 const updatefeatureimage= asynchandler(async(req,res)=>{
     const {_id}=req.body
-    console.log(_id)
-    console.log(req.files)
+    // console.log(_id)
+    // console.log(req.files)
 
     let Post_data = await posts.findById(_id)
   
@@ -124,8 +130,15 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
 
         
     }  
+    if (Post_data.featured_image!="") {
+      await deleteFromCloudinary(Post_data.featured_image)
+      // console.log("helo");
+      
+    }  
+
 
     let featureimagelocalpath ;
+    let featureimage;
     
  
     if(req.files.featured_image!=undefined){
@@ -136,7 +149,7 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
 
           featureimage.url = featureimage.url.replace(/^http:/, 'https:');
 
-          Post_data.product_back_image=featureimage.url
+          Post_data.featured_image=featureimage.url
     }
   
     
@@ -150,15 +163,27 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
 
     return res
     .status(200)
-    .json(new ApiResponse(200,{Post_data},"image updated sucessfully"))
+    .json(new ApiResponse(200,{Post_data},"feature image updated sucessfully"))
 })
 
 
 
 
+const remove_post = asynchandler(async(req, res) => {
+  const {_id} = req.body;
+  // console.log(req.body);
+  // console.log(_id);
   
-const remove_post = asynchandler(async (req, res) => {
-  const { _id } = req.params;
+
+  const Post_data = await posts.findById(_id)
+//  console.log("sssseeeeeeeeess",Post_data);
+ 
+ if (Post_data.featured_image!="") {
+  await deleteFromCloudinary(Post_data.featured_image)
+  console.log("hellllllllll");
+  
+ }
+
 
   const deletedPost = await posts.findByIdAndDelete(_id);
 
@@ -183,137 +208,125 @@ const remove_post = asynchandler(async (req, res) => {
 
 
 
- 
-const allposts = asynchandler(async (req, res) => {
-  const  User  = req.user;
-  const  Userid  = User._id;
-
-  const { condition } = req.params;
-
-  console.log(condition);
-
-  console.log(Userid);
-
-  console.log( moment().startOf('month').toDate(),
-   moment().endOf('month').toDate());
 
 
-  const products_data = await consumption.aggregate([
-    { $match: { consumed_By: new mongoose.Types.ObjectId(Userid) } }, // Match products based on the query parameters
+const allposts = asynchandler(async (req,res)=>{
+
     
-    { 
-      $lookup: {
-        from: 'producttts', // Name of the products collection
-        localField: 'product_id',
-        foreignField: '_id', // Adjust the field name if necessary
-        as: 'consumed_products'
-      }
-    },
-    {
-      $lookup: {
-        from: 'productratings', // Name of the ratings collection
-        localField: 'product_id',
-        foreignField: 'product_id', // Adjust the field name if necessary
-        as: 'ratings'
-      }
-    },
-    { $unwind: '$ratings' },
-    { $unwind: '$consumed_products' },
-    {
-      $addFields: {
-        consumed_At_date_converted: {
-          $dateFromString: {
-            dateString: '$consumed_At_date',
-            format: '%d/%m/%Y', // Adjust format according to your date string format
-            onError: new Date(0) // Default value in case of conversion error
+    
+  const posts = await product.aggregate([
+       // Match products based on the query parameters
+      {
+          $lookup: {
+              from: 'productratings', // Name of the ratings collection
+              localField: '_id',
+              foreignField: 'product_id', // Adjust the field name if necessary
+              as: 'ratings'
           }
-        }
-      }
-    },
-    {
-      $addFields: {
-        isToday: {
-          $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().format("YYYY-MM-DD")]
-        },
-        isYesterday: {
-          $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$consumed_At_date_converted" } }, moment().subtract(1, 'day').format("YYYY-MM-DD")]
-        },
-        isThisWeek: {
-          $and: [
-            { $gte: ["$consumed_At_date_converted", moment().startOf('week').toDate()] },
-            { $lte: ["$consumed_At_date_converted", moment().endOf('week').toDate()] }
-          ]
-        },
-        ispreviousWeek: {
-          $and: [
-            { $gte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').startOf('week').toDate()] },
-            { $lte: ["$consumed_At_date_converted", moment().subtract(1, 'weeks').endOf('week').toDate()] }
-          ]
-        },
-        isThisMonth: {
-          $and: [
-            { $gte: ["$consumed_At_date_converted", moment().startOf('month').toDate()] },
-            { $lte: ["$consumed_At_date_converted", moment().endOf('month').toDate()] }
-          ]
-        }
-      }
-    },
-    {
-      $project: {
-        consumed_By: 1,
-        consumed_At_date: 1,
-        consumed_At_time: 1,
-        consumed_At_date_converted:1,
-        'consumed_products.product_barcode': 1,
-        'consumed_products.product_name': 1,
-        'consumed_products.brand_name': 1,
-        'consumed_products.product_front_image': 1,
-        'consumed_products.product_category': 1,
-        'ratings.product_finalscore': 1,
-        'ratings.product_nutriscore': 1,
-        isToday: 1,
-        isYesterday: 1,
-        isThisWeek: 1,
-        ispreviousWeek:1,
-        isThisMonth: 1
-      }
-    }
-  ]);
-  
-  // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
-  let filteredData;
-  switch (condition) {
-    case 'today':
-      filteredData = products_data.filter(item => item.isToday);
-      break;
-    case 'yesterday':
-      filteredData = products_data.filter(item => item.isYesterday);
-      break;
-    case 'week':
-      filteredData = products_data.filter(item => item.isThisWeek);
-      break;
-    case 'previousweek':
-      filteredData = products_data.filter(item => item.ispreviousWeek);
-      break;
-    case 'month':
-      filteredData = products_data.filter(item => item.isThisMonth);
-      break;
-    default:
-      filteredData = products_data; // Return all data if no specific condition is given
-  }
+      },
+      {
+          $unwind: '$ratings'
+      },
+      {
+          $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "product_id",
+            as: "likes",
+          },
+      },
+      {
+          $addFields: {
+              likesCount: { $size: "$likes" }
+          }
+      },
+      {
+          $lookup: {
+              from: "likes",
+              localField: "_id",
+              foreignField: "product_id",  // Ensure this field matches the field in likes collection
+              as: "isliked",
+              pipeline: [
+                  {
+                      $match: {
+                          likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                      },
+                  },
+              ],
+          },
+      },
+      {
+          $addFields: {
+              likesCount: { $size: "$likes" },
+              ratings:  "$ratings" ,
+              isliked: {
+                  $cond: {
+                    if: {
+                      $gte: [
+                        {
+                          // if the isLiked key has document in it
+                          $size: "$isliked",
+                        },
+                        1,
+                      ],
+                    }, 
+                    then: true,
+                    else: false,
+                  },
+                },
+               
+          }
+      },
+      {
+          $project: {
+            likesCount: { $size: "$likes" },  
+            isliked:1,
+            _id: 1,
+            likesCount: 1,
+            ratings: 1,
+            product_barcode: 1,
+            product_name:1,
+            brand_name:1,
+            rank:1,
+            product_category:1,
+            product_front_image:1,
+            fetchCount:1,
+            product_finalscore: "$ratings.product_finalscore",
+            product_nutriscore: "$ratings.product_nutriscore"
 
-  
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          filteredData,
+          }
         },
-        "products fetched sucessfully"
-      )
-    );
-  
-});
+        {
+          $project:{
+              ratings:0
+          }
+        },
+      //   {
+      //     $sort: {
+      //         fetchCount: -1 // Sort by ratings in descending order (highest first)
+      //     }
+      //   }
+      
+
+  ])
+
+
+
+
+
+
+  return res
+  .status(200)
+  .json(
+      new ApiResponse(
+          200,
+          
+          products
+          ,
+          "products fetched sucessfully")
+  )
+
+})
 
 
 
