@@ -170,7 +170,7 @@ const updatefeatureimage= asynchandler(async(req,res)=>{
 
 
 const remove_post = asynchandler(async(req, res) => {
-  const {_id} = req.body;
+  const {_id} = req.prams;
   // console.log(req.body);
   // console.log(_id);
   
