@@ -39,5 +39,7 @@ const postschema= new mongoose.Schema({
 // ,{timestamps:true}
 )
 
+postschema.plugin(mongooseAggregatePaginate);
+
 
 export const posts = mongoose.model("posts", postschema)     

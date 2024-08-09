@@ -7,6 +7,7 @@ import { product } from "../models/product.models.js";
 import { bookmark } from "../models/bookmark.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
+import { getMongoosePaginationOptions } from "../utils/helper.js";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
 
@@ -118,8 +119,8 @@ const createpost = asynchandler(async(req, res) => {
 
 const updatefeatureimage= asynchandler(async(req,res)=>{
     const {_id}=req.body
-    console.log(_id)
-    console.log(req.files)
+    // console.log(_id)
+    // console.log(req.files)
 
     let Post_data = await posts.findById(_id)
   
@@ -269,9 +270,9 @@ const bookmarkPost = asynchandler(async (req, res) => {
 
 const allposts = asynchandler(async (req,res)=>{
 
+  const { page = 1, limit = 5 } = req.query;
     
-    
-  const posts_data = await posts.aggregate([
+  const post_aggregation = await posts.aggregate([
        // Match products based on the query parameters
       {
           $lookup: {
@@ -383,7 +384,17 @@ const allposts = asynchandler(async (req,res)=>{
 
 
 
-
+  const posts_data = await posts.aggregatePaginate(
+    post_aggregation,
+    getMongoosePaginationOptions({
+      page,
+      limit,
+      customLabels: {
+        totalDocs: "totalPosts",
+        docs: "posts",
+      },
+    })
+  );
 
 
   return res
