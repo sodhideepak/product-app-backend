@@ -8,6 +8,7 @@ import { bookmark } from "../models/bookmark.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadoncloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import { getMongoosePaginationOptions } from "../utils/helper.js";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 import mongoose from "mongoose";
 import moment from "moment-timezone";
 
@@ -242,7 +243,7 @@ const bookmarkPost = asynchandler(async (req, res) => {
         {
           isBookmarked: false,
         },
-        "Unliked successfully"
+        "Removed form Bookmark sucessfully"
       )
     );
   } else {
@@ -257,7 +258,7 @@ const bookmarkPost = asynchandler(async (req, res) => {
         {
           isBookmarked: true,
         },
-        "Liked successfully"
+        "Bookmarked successfully"
       )
     );
   }
@@ -268,11 +269,130 @@ const bookmarkPost = asynchandler(async (req, res) => {
 
 
 
+const bookmark_post_list = asynchandler(async (req, res) => {
+  const  User  = req.user;
+  const  Userid  = User._id;
+
+  const { page = 1, limit = 5 } = req.query;
+
+  // const comment = await SocialComment.findById(commentId);
+
+  // Check for comment existence
+  // if (!comment) {
+  //   throw new ApiError(404, "Comment does not exist");
+  // }
+  // console.log(Userid)
+  const Bookmarked_posts_aggregate = bookmark.aggregate([
+      { $match:
+          {bookamrked_By:new mongoose.Types.ObjectId(Userid)} 
+      }, // Match products based on the query parameters
+      
+      { 
+          $lookup: {
+              from: 'posts', // Name of the ratings collection
+              localField: 'post_id',
+              foreignField: '_id', // Adjust the field name if necessary
+              as: 'bookmarked_posts',
+             
+            }
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "post_id",
+          foreignField: "post_id",
+          as: "likes",
+        },
+    },
+    {
+        $addFields: {
+            likesCount: { $size: "$likes" }
+        }
+    },
+    {
+        $lookup: {
+            from: "likes",
+            localField: "post_id",
+            foreignField: "post_id",  // Ensure this field matches the field in likes collection
+            as: "isliked",
+            pipeline: [
+                {
+                    $match: {
+                        likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                    },
+                },
+            ],
+        },
+    },
+    {
+        $addFields: {
+            likesCount: { $size: "$likes" },
+            isliked: {
+                $cond: {
+                  if: {
+                    $gte: [
+                      {
+                        // if the isLiked key has document in it
+                        $size: "$isliked",
+                      },
+                      1,
+                    ],
+                  }, 
+                  then: true,
+                  else: false,
+                },
+              },
+              isbookmarked: true
+            
+        }
+    },
+      {
+        $project:{
+            likes:0
+        }
+      },
+ 
+     
+          
+  ]);
+
+
+  const Bookmark_posts_data = await bookmark.aggregatePaginate(
+    Bookmarked_posts_aggregate,
+    getMongoosePaginationOptions({
+      page,
+      limit,
+      customLabels: {
+        totalDocs: "totalposts",
+        docs: "posts",
+      },
+    })
+  );
+
+  
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          Bookmark_posts_data,
+        },
+        "posts fetched sucessfully"
+      )
+    );
+  
+});
+
+
+
+
+
 const allposts = asynchandler(async (req,res)=>{
 
   const { page = 1, limit = 5 } = req.query;
+  // console.log(req.user?._id  );
+  
     
-  const post_aggregation = await posts.aggregate([
+  const post_aggregation = posts.aggregate([
        // Match products based on the query parameters
       {
           $lookup: {
@@ -328,14 +448,14 @@ const allposts = asynchandler(async (req,res)=>{
                           // if the isLiked key has document in it
                           $size: "$isliked",
                         },
-                        0,
+                        1,
                       ],
                     }, 
                     then: true,
                     else: false,
                   },
                 },
-                isbookmarked: {
+              isbookmarked: {
                   $cond: {
                     if: {
                       $gte: [
@@ -353,25 +473,6 @@ const allposts = asynchandler(async (req,res)=>{
                
           }
       },
-      // {
-      //     $project: {
-      //       likesCount: { $size: "$likes" },  
-      //       isliked:1,
-      //       _id: 1,
-      //       likesCount: 1,
-      //       ratings: 1,
-      //       product_barcode: 1,
-      //       product_name:1,
-      //       brand_name:1,
-      //       rank:1,
-      //       product_category:1,
-      //       product_front_image:1,
-      //       fetchCount:1,
-      //       product_finalscore: "$ratings.product_finalscore",
-      //       product_nutriscore: "$ratings.product_nutriscore"
-
-      //     }
-      //   },
         {
           $project:{
               likes:0
@@ -383,14 +484,13 @@ const allposts = asynchandler(async (req,res)=>{
   ])
 
 
-
   const posts_data = await posts.aggregatePaginate(
     post_aggregation,
     getMongoosePaginationOptions({
       page,
       limit,
       customLabels: {
-        totalDocs: "totalPosts",
+        totalDocs: "totalposts",
         docs: "posts",
       },
     })
@@ -420,5 +520,6 @@ const allposts = asynchandler(async (req,res)=>{
            updatefeatureimage,
            remove_post,
            allposts,
-           bookmarkPost
+           bookmarkPost,
+           bookmark_post_list
           };

@@ -184,6 +184,58 @@ console.log(_id);
     
   });
   
+
+
+
+
+
+
+
+  const liked_post = asynchandler(async (req, res) => {
+    const  User  = req.user;
+    const  Userid  = User._id;
+  
+    // const comment = await SocialComment.findById(commentId);
+  
+    // Check for comment existence
+    // if (!comment) {
+    //   throw new ApiError(404, "Comment does not exist");
+    // }
+    console.log(Userid)
+    const liked_posts = await like.aggregate([
+        { $match:
+            {likedBy:new mongoose.Types.ObjectId(Userid)} 
+        }, // Match products based on the query parameters
+        
+        { 
+            $lookup: {
+                from: 'posts', // Name of the ratings collection
+                localField: 'post_id',
+                foreignField: '_id', // Adjust the field name if necessary
+                as: 'liked_posts',
+               
+              }
+        },
+       
+            
+    ]);
+  
+    
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            liked_posts,
+          },
+          "products fetched sucessfully"
+        )
+      );
+    
+  });
+
+
+
+  
   export { likeDislikeProduct, liked_product ,
-            likeDislikePost 
+            likeDislikePost ,liked_post
   };

@@ -58,7 +58,7 @@ for (let week = 0; week < 4; week++) {
   });
 }
 
-console.log(weeks);
+// console.log(weeks);
 
 
 
@@ -285,16 +285,6 @@ const consumed_products = asynchandler(async (req, res) => {
       }
     },
     {
-      $lookup: {
-        from: 'productratings', // Name of the ratings collection
-        localField: 'product_id',
-        foreignField: 'product_id', // Adjust the field name if necessary
-        as: 'ratings'
-      }
-    },
-    { $unwind: '$ratings' },
-    { $unwind: '$consumed_products' },
-    {
       $addFields: {
         consumed_At_date_converted: {
           $dateFromString: {
@@ -343,28 +333,11 @@ const consumed_products = asynchandler(async (req, res) => {
       }
     },
     {
-      $project: {
-        consumed_By: 1,
-        consumed_At_date: 1,
-        consumed_At_time: 1,
-        consumed_At_date_converted:1,
-        serving_size:1,
-        'consumed_products.product_barcode': 1,
-        'consumed_products.product_name': 1,
-        'consumed_products.brand_name': 1,
-        'consumed_products.nutritional_value': 1,
-        'consumed_products.product_front_image': 1,
-        'consumed_products.product_category': 1,
-        'ratings.product_finalscore': 1,
-        'ratings.product_nutriscore': 1,
-        isToday: 1,
-        isThisWeek: 1,
-        isLastWeek:1,
-        isThirdLastWeek: 1,
-        isFourthLastWeek:1,
-        isThisMonth: 1,
+      $addFields: {
+        productsCount: { $size: "$consumed_products" }
       }
-    }
+    },
+  
   ]);
   
   // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
@@ -405,113 +378,41 @@ const consumed_products = asynchandler(async (req, res) => {
   }
 
 
-  // const sumNutritionalValues = (data, filterFn) => {
-  //   return data.filter(filterFn).reduce((acc, item) => {
-  //     const nutritionalValue = item.consumed_products.nutritional_value;
-      
-  //     const sumNestedValues = (obj) => {
-  //       return Object.values(obj).reduce((sum, value) => {
-  //         if (typeof value === 'object') {
-  //           return sum + sumNestedValues(value);
-  //         }
-  //         return sum + value;
-  //       }, 0);
-  //     };
-  
-  //     Object.keys(nutritionalValue).forEach(key => {
-  //       if (typeof nutritionalValue[key] === 'object') {
-  //         acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key]);
-  //       } else {
-  //         acc[key] = (acc[key] || 0) + nutritionalValue[key];
-  //       }
-  //     });
-  //     return acc;
-  //   }, {});
-  // };
 
 
+let totalNutritionalValue = {
+  energy: 0,
+  protein: 0,
+  total_carbohydrates: 0,
+  total_fats: 0,
+  sodium: 0,
+  cholestrol: 0
+  // Add more nutritional fields as needed
+};
 
 
+consumedproductdata.forEach(product => {
 
-  const sumNutritionalValues = (data, filterFn) => {
-    const sumNestedValues = (obj, servingSize) => {
-      return Object.values(obj).reduce((sum, value) => {
-        if (typeof value === 'object') {
-          return sum + sumNestedValues(value, servingSize);
-        }
-        return sum + (value * servingSize / 100);
-      }, 0);
-    };
-  
-    return data.filter(filterFn).reduce((acc, item) => {
-      const products = item.consumed_products;
-      console.log(products);
-  console.log();
-      if (Array.isArray(products)) {
-        products.forEach(product => {
-          const nutritionalValue = product.nutritional_value;
-          const servingSize = product.serving_size;
-  
-          Object.keys(nutritionalValue).forEach(key => {
-            if (typeof nutritionalValue[key] === 'object') {
-              acc[key] = (acc[key] || 0) + sumNestedValues(nutritionalValue[key], servingSize);
-            } else {
-              acc[key] = (acc[key] || 0) + (nutritionalValue[key] * servingSize / 100);
-            }
-          });
-        });
-      } else {
-        console.error('consumed_products is not an array:', products);
-      }
-  
-      return acc;
-    }, {});
-  };
-  
-  
-  // console.log(sumNutritionalValues);
-  
-  
-console.log("hello",products_data.serving_size);
-// console.log(products_data);
-// console.log(consumedproductdata);
-  let nutritionalvaluesum;
-  switch (condition) {
-    case 'today':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isToday);
-      break; 
-    case 'currentweek':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisWeek);
-      break;
-    case 'lastweek':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isLastWeek);
-      break;
-    case 'thirdlastweek':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThirdLastWeek);
-      break;
-    case 'fourthlastweek':
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isFourthLastWeek);
-      break;
-    default:
-      nutritionalvaluesum =  sumNutritionalValues(consumedproductdata, item => item.isThisWeek);
-  }
+  const consumedProduct = product.consumed_products[0]; // Access the first element
+  const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
+
+  // Calculate adjusted nutritional values based on the serving size
+  const nutritionalValue = consumedProduct.nutritional_value;
+  const factor = servingSize / 100; // Factor to adjust nutritional values
+
+  // Accumulate total nutritional values
+  totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+  totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+  totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+  totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+  totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+  totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+  // Continue adding and adjusting other nutritional fields as needed
+ 
+});
 
 
-
-  let response = consumedproductdata.map(item => ({
-    _id: item._id,
-    consumed_By: item.consumed_By,
-    consumed_At_date: item.consumed_At_date,
-    consumed_At_time: item.consumed_At_time,
-    consumed_products: {
-      product_barcode: item.consumed_products.product_barcode,
-      product_name: item.consumed_products.product_name,
-      brand_name: item.consumed_products.brand_name,
-      product_category: item.consumed_products.product_category,
-      product_front_image: item.consumed_products.product_front_image
-    }
-
-  }));
+ 
 
   const initializeWeekData = (condition) => {
     const daysOfWeek = [];
@@ -566,44 +467,76 @@ console.log("hello",products_data.serving_size);
 
 
   const weekData = initializeWeekData(condition);
-  // console.log(weekData);
+ 
+
+
+
+
+
 
 
 
 consumedproductdata.forEach(product => {
   const consumedDate = moment(product.consumed_At_date_converted).format('YYYY-MM-DD');
   const dayIndex = weekData.findIndex(day => day.date === consumedDate);
-  
+
   if (dayIndex !== -1) {
+    const consumedProduct = product.consumed_products[0]; // Access the first element
+    const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
+
+    // Initialize total nutritional values object if it doesn't exist
+    if (!weekData[dayIndex].totalNutritionalValue) {
+      weekData[dayIndex].totalNutritionalValue = {
+        energy: 0,
+        protein: 0,
+        total_carbohydrates: 0,
+        total_fats: 0,
+        sodium: 0,
+        cholestrol: 0
+        // Add more nutritional fields as needed
+      };
+    }
+
+    // Calculate adjusted nutritional values based on the serving size
+    const nutritionalValue = consumedProduct.nutritional_value;
+    const factor = servingSize / 100; // Factor to adjust nutritional values
+
+    weekData[dayIndex].totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+    weekData[dayIndex].totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+    weekData[dayIndex].totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+    weekData[dayIndex].totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+    weekData[dayIndex].totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+    weekData[dayIndex].totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+    // Continue adding and adjusting other nutritional fields as needed
+
+    // Add product details to the week's data
     weekData[dayIndex].products.push({
       _id: product._id,
-      consumed_By: product.consumed_By,
-      consumed_At_date: product.consumed_At_date,
-      consumed_At_time: product.consumed_At_time,
-      serving_size:product.serving_size,
-      consumed_products: {
-        product_barcode: product.consumed_products.product_barcode,
-        product_name: product.consumed_products.product_name,
-        brand_name: product.consumed_products.brand_name,
-        product_category: product.consumed_products.product_category,
-        product_front_image: product.consumed_products.product_front_image
+      serving: servingSize,
+      consumed_product: {
+        product_barcode: consumedProduct.product_barcode,
+        product_name: consumedProduct.product_name,
       },
-      ratings: product.ratings,
-
     });
   }
 });
 
 
+
+
+  
+
+
 // console.log('Week Data:', products_data);
 // console.log('Week Data:', products_data.length);
-
+ 
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          weekData,nutritionalvaluesum,totalproductconsumed
+          weekData,
+          totalNutritionalValue,totalproductconsumed
         },
         "products fetched sucessfully"
       )

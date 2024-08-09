@@ -11,12 +11,12 @@ const likeschema= new mongoose.Schema({
     },
     post_id:{
         type: Schema.Types.ObjectId,
-        ref: "blog",   
+        ref: "post",   
         default: null,
     }, 
     comment_id:{
         type: Schema.Types.ObjectId,
-        ref: "blog",   
+        ref: "post",   
         default: null,
     },
     likedBy: {

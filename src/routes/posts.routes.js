@@ -24,12 +24,13 @@ import { createpost,
          updatefeatureimage,
          remove_post,
          allposts ,
-         bookmarkPost
+         bookmarkPost,
+         bookmark_post_list
 
 
 } from "../controllers/post.controller.js";
 import { 
-    likeDislikeProduct,
+    liked_post,
     liked_product,
     likeDislikePost
 
@@ -65,7 +66,19 @@ updatefeatureimage)
 router.route("/likeDislikePost/:_id").post(verifyJWT,likeDislikePost)
 
 
+
+
+router.route("/liked_post").get(verifyJWT,liked_post)
+
+
+
+
 router.route("/bookmarkPost/:_id").post(verifyJWT,bookmarkPost)
+
+
+
+
+router.route("/bookmark_post_list").get(verifyJWT,bookmark_post_list)
 
 
 
@@ -113,7 +126,6 @@ router.route("/RemoveConsumeProduct/:_id").post(verifyJWT,Remove_From_Consumptio
 
 
 
-router.route("/liked_product").get(verifyJWT,liked_product)
 
 
 router.route("/update_product_rating").post(update_product_rating)
