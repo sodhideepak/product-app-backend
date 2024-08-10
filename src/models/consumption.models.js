@@ -23,7 +23,7 @@ const consumptionschema= new mongoose.Schema({
         
     }
 
-}
+},{timestamps:true}
 )
 
 

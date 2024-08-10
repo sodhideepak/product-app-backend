@@ -157,6 +157,7 @@ const ConsumeProduct = asynchandler(async (req, res) => {
         product_id:product_data._id,
         consumed_By:req.user._id,
         consumed_At_date:current_date,
+        // consumed_At_date:"10/07/2024",
         consumed_At_time:current_time,
         serving_size
     })
@@ -212,64 +213,6 @@ const consumed_products = asynchandler(async (req, res) => {
   const  Userid  = User._id;
 
   const { condition } = req.params;
-
-  // console.log(condition);
-
-  // console.log(Userid);
-
-  // console.log( moment().startOf('month').toDate(),
-  //  moment().endOf('month').toDate());
-  // const comment = await SocialComment.findById(commentId);
-
-  // Check for comment existence
-  // if (!comment) {
-  //   throw new ApiError(404, "Comment does not exist");
-  // }
-  // console.log(Userid)
-  // const products_data = await consumption.aggregate([
-  //     { $match:
-  //         {consumed_By:new mongoose.Types.ObjectId(Userid)} 
-  //     }, // Match products based on the query parameters
-      
-  //     { 
-  //         $lookup: {
-  //             from: 'producttts', // Name of the ratings collection
-  //             localField: 'product_id',
-  //             foreignField: '_id', // Adjust the field name if necessary
-  //             as: 'consumed_products',
-             
-  //           }
-  //     },
-  //     {
-  //       $lookup: {
-  //           from: 'productratings', // Name of the ratings collection
-  //           localField: 'product_id',
-  //           foreignField: 'product_id', // Adjust the field name if necessary
-  //           as: 'ratings'
-  //       }
-  //   },
-  //   {
-  //     $unwind: '$ratings'
-  //   },
-  //   {
-  //     $unwind: '$consumed_products'
-  //   },
-  //   {
-  //         $project: {
-  //           consumed_By: 1, // Exclude the _id field from the result
-  //           consumed_At_date: 1, // Exclude the _id field from the result
-  //           consumed_At_time: 1, // Exclude the _id field from the result
-  //           'consumed_products.product_barcode': 1,
-  //           'consumed_products.product_name': 1,
-  //           'consumed_products.brand_name': 1,
-  //           'consumed_products.product_front_image': 1,
-  //           'consumed_products.product_category': 1,
-  //           'ratings.product_finalscore':1,
-  //           'ratings.product_nutriscore':1
-  //         }
-  //   }
-          
-  // ]);
 
 
 
@@ -372,9 +315,10 @@ const consumed_products = asynchandler(async (req, res) => {
       consumedproductdata = products_data.filter(item => item.isThisMonth);
       totalproductconsumed = consumedproductdata.length;
       break;
-    default:
-      consumedproductdata = products_data; // Return all data if no specific condition is given
-      totalproductconsumed = consumedproductdata.length;
+    default :
+    consumedproductdata = products_data.filter(item => item.isThisWeek);
+    totalproductconsumed = consumedproductdata.length;
+    break;
   }
 
 
@@ -525,12 +469,6 @@ consumedproductdata.forEach(product => {
 
 
   
-
-
-// console.log('Week Data:', products_data);
-// console.log('Week Data:', products_data.length);
- 
-  
     return res.status(200).json(
       new ApiResponse(
         200,
@@ -553,7 +491,278 @@ consumedproductdata.forEach(product => {
 
 
 
+
+
+ 
+const consumed_products_day = asynchandler(async (req, res) => {
+  const  User  = req.user;
+  const  Userid  = User._id;
+console.log(Userid);
+
+  const { date } = req.query;
+  const dateObject = moment(date, "YYYY-MM-DD").toDate();
+
+  console.log(date);
+  console.log(dateObject);
+  
+  
+
+  // console.log(Userid);
+
+  // console.log( moment().startOf('month').toDate(),
+  //  moment().endOf('month').toDate());
+  // const comment = await SocialComment.findById(commentId);
+
+  // Check for comment existence
+  // if (!comment) {
+  //   throw new ApiError(404, "Comment does not exist");
+  // }
+  // console.log(Userid)
+  // const products_data = await consumption.aggregate([
+  //     { $match:
+  //         {consumed_By:new mongoose.Types.ObjectId(Userid)} 
+  //     }, // Match products based on the query parameters
+      
+  //     { 
+  //         $lookup: {
+  //             from: 'producttts', // Name of the ratings collection
+  //             localField: 'product_id',
+  //             foreignField: '_id', // Adjust the field name if necessary
+  //             as: 'consumed_products',
+             
+  //           }
+  //     },
+  //     {
+  //       $lookup: {
+  //           from: 'productratings', // Name of the ratings collection
+  //           localField: 'product_id',
+  //           foreignField: 'product_id', // Adjust the field name if necessary
+  //           as: 'ratings'
+  //       }
+  //   },
+  //   {
+  //     $unwind: '$ratings'
+  //   },
+  //   {
+  //     $unwind: '$consumed_products'
+  //   },
+  //   {
+  //         $project: {
+  //           consumed_By: 1, // Exclude the _id field from the result
+  //           consumed_At_date: 1, // Exclude the _id field from the result
+  //           consumed_At_time: 1, // Exclude the _id field from the result
+  //           'consumed_products.product_barcode': 1,
+  //           'consumed_products.product_name': 1,
+  //           'consumed_products.brand_name': 1,
+  //           'consumed_products.product_front_image': 1,
+  //           'consumed_products.product_category': 1,
+  //           'ratings.product_finalscore':1,
+  //           'ratings.product_nutriscore':1
+  //         }
+  //   }
+          
+  // ]);
+
+
+  const products_data = await consumption.aggregate([
+    {
+      $match: {
+        consumed_By: new mongoose.Types.ObjectId(Userid),
+        consumed_At_date: date, // Directly match the string date
+      }
+    },
+    {
+      $lookup: {
+        from: 'producttts',
+        localField: 'product_id',
+        foreignField: '_id',
+        as: 'consumed_products'
+      }
+    },
+    {
+      $project: {
+        consumed_By: 1,
+        consumed_At_date: 1,
+        consumed_At_time: 1,
+        serving_size:1,
+        consumed_products: {
+          product_barcode: 1,
+          product_name: 1,
+          brand_name: 1,
+          product_category: 1,
+          product_front_image: 1
+        }
+      }
+    }
+  ]);
+  
+  
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          products_data
+        },
+        "products fetched sucessfully"
+      )
+    );
+  
+});
+
+
+
+
+
+
+
+const getMonthlyReport = async (req, res) => {
+  
+    const Userid = req.user._id;
+    // const Userid= User._id
+console.log(Userid);
+
+    const{condition}=req.params
+    console.log(condition);
+    
+  
+    const products_data = await consumption.aggregate([
+      { $match: { consumed_By: new mongoose.Types.ObjectId(Userid) } }, // Match products based on the query parameters
+      
+      { 
+        $lookup: {
+          from: 'producttts', // Name of the products collection
+          localField: 'product_id',
+          foreignField: '_id', // Adjust the field name if necessary
+          as: 'consumed_products'
+        }
+      },
+      {
+        $addFields: {
+          consumed_At_date_converted: {
+            $dateFromString: {
+              dateString: '$consumed_At_date',
+              format: '%d/%m/%Y', // Adjust format according to your date string format
+              onError: new Date(0) // Default value in case of conversion error
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          isThisMonth: {
+            $and: [
+              { $gte: ["$consumed_At_date_converted", moment().startOf('month').toDate()] },
+              { $lte: ["$consumed_At_date_converted", moment().endOf('month').toDate()] }
+            ]
+          },
+          isLastMonth: {
+            $and: [
+              { $gte: ["$consumed_At_date_converted", moment().subtract(1, 'month').startOf('month').toDate()] },
+              { $lte: ["$consumed_At_date_converted", moment().subtract(1, 'month').endOf('month').toDate()] }
+            ]
+          },
+          isThirdLastMonth: {
+            $and: [
+              { $gte: ["$consumed_At_date_converted", moment().subtract(2, 'month').startOf('month').toDate()] },
+              { $lte: ["$consumed_At_date_converted", moment().subtract(2, 'month').endOf('month').toDate()] }
+            ]
+          },
+          isFourthLastMonth: {
+            $and: [
+              { $gte: ["$consumed_At_date_converted", moment().subtract(3, 'month').startOf('month').toDate()] },
+              { $lte: ["$consumed_At_date_converted", moment().subtract(3, 'month').endOf('month').toDate()] }
+            ]
+          },
+        }
+      },
+      {
+        $addFields: {
+          productsCount: { $size: "$consumed_products" }
+        }
+      },
+    
+    ]);
+    
+
+
+     // Assuming request has a field "condition" that states 'today', 'yesterday', or 'week'
+  let consumedproductdata;
+  let totalproductconsumed;
+  switch (condition) {
+    case 'month':
+      consumedproductdata = products_data.filter(item => item.isThisMonth);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    case 'lastmonth':
+      consumedproductdata = products_data.filter(item => item.isLastMonth);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    case 'thirdlastmonth':
+      consumedproductdata = products_data.filter(item => item.isThirdLastMonth);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    case 'fourthlastmonth':
+      consumedproductdata = products_data.filter(item => item.isFourthLastMonth);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+    default:
+      consumedproductdata = products_data.filter(item => item.isThisMonth);
+      totalproductconsumed = consumedproductdata.length;
+      break;
+  }
+
+
+  let totalNutritionalValue = {
+    energy: 0,
+    protein: 0,
+    total_carbohydrates: 0,
+    total_fats: 0,
+    sodium: 0,
+    cholestrol: 0
+    // Add more nutritional fields as needed
+  };
+
+  consumedproductdata.forEach(product => {
+
+    const consumedProduct = product.consumed_products[0]; // Access the first element
+    const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
+  
+    // Calculate adjusted nutritional values based on the serving size
+    const nutritionalValue = consumedProduct.nutritional_value;
+    const factor = servingSize / 100; // Factor to adjust nutritional values
+  
+    // Accumulate total nutritional values
+    totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+    totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+    totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+    totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+    totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+    totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+    // Continue adding and adjusting other nutritional fields as needed
+   
+  });
+  
+  console.log(products_data);
+  
+
+
+
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          totalproductconsumed,totalNutritionalValue
+        },
+        "products fetched sucessfully"
+      )
+    );
+  }
+
+
   export { ConsumeProduct, 
            Remove_From_Consumption,
-           consumed_products
+           consumed_products,
+           consumed_products_day,
+           getMonthlyReport
           };

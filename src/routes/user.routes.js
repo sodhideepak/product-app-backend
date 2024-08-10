@@ -17,7 +17,7 @@ import {
     forgotpassword,
     resetpassword
      } from "../controllers/user.controller.js";
-import { consumed_products } from "../controllers/consumption.controllers.js";
+import { consumed_products,consumed_products_day,getMonthlyReport } from "../controllers/consumption.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -64,6 +64,14 @@ router.route("/resetpassword").post(resetpassword)
 
 
 router.route("/consumedproducts/:condition").get(verifyJWT,consumed_products)
+
+
+
+router.route("/consumed_products_day").get(verifyJWT,consumed_products_day)
+
+
+
+router.route("/getMonthlyReport/:condition").get(verifyJWT,getMonthlyReport)
 
 
 export default router 
