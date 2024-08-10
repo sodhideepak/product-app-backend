@@ -619,10 +619,10 @@ const getMonthlyReport = async (req, res) => {
   
     const Userid = req.user._id;
     // const Userid= User._id
-console.log(Userid);
+// console.log(Userid);
 
     const{condition}=req.params
-    console.log(condition);
+    // console.log(condition);
     
   
     const products_data = await consumption.aggregate([
@@ -742,7 +742,7 @@ console.log(Userid);
    
   });
   
-  console.log(products_data);
+  // console.log(products_data);
   
 
 
