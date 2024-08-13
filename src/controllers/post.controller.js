@@ -95,7 +95,7 @@ const createpost = asynchandler(async(req, res) => {
         content,
         tags,
         author:"heetox",
-        featured_image:"",
+        featured_image:"https://res.cloudinary.com/ddvloqbxp/image/upload/v1723571613/nzcepapn0q4ik1rcwfzm.jpg",
         created_At_date:current_date,
         created_At_time:current_time,
     })
