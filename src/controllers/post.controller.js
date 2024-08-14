@@ -87,7 +87,7 @@ const createpost = asynchandler(async(req, res) => {
 // console.log(current_date,current_time);
 
 
-      
+      //adding routes 
 
   
     const post_data=await posts.create({  
