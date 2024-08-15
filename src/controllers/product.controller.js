@@ -1254,18 +1254,20 @@ const update_product_rating = asynchandler(async(req,res)=>{
     for (const productt of products) {
       // Calculate the new rating
     //   const newRating = calculateNewRating(product.nutritionalInfo);
+// console.log(products);
+// console.log(products[0].nutritional_value.energy);
 
     
     const {finalScore,
         nutriScore
           }= calculateNutriScore(
-            productt.nutritional_value[1].per_100ml.kcal,
-            productt.nutritional_value[1].per_100ml.carbs,   
-            productt.nutritional_value[1].per_100ml.fats,  
-            productt.nutritional_value[1].per_100ml.protine,   
-            productt.nutritional_value[1].per_100ml.sodium,
-            productt.fruitsVegetablesPercentage,
-            productt.dietry_fiber
+            products[0].nutritional_value.energy,
+            products[0].nutritional_value.total_carbohydrates,   
+            products[0].nutritional_value.fats.saturates_fats,  
+            products[0].nutritional_value.protein,   
+            products[0].nutritional_value.sodium,
+            products[0].fruitsVegetablesPercentage,
+            products[0].nutritional_value.carbohydrates.dietry_fibre
           )
 
     
