@@ -88,6 +88,6 @@ const productschema= new Schema(
 
 
     productschema.plugin(mongooseAggregatePaginate)
-
+ 
 // export const product = mongoose.model("final_product",productschema)
 export const product = mongoose.model("producttt",productschema)
