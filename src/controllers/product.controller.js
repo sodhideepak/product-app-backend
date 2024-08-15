@@ -264,6 +264,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         nutritional_value,
         product_category,
         price,
+        measuring_unit,
         fruitsVegetablesPercentage,
         dietry_fiber
     }= req.body
@@ -313,6 +314,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         price:price,
         ingredients,
         nutritional_value,
+        measuring_unit,
         fruitsVegetablesPercentage:fruitsVegetablesPercentage||0,
         dietry_fiber:dietry_fiber||0,
         // product_finalscore:finalScore,
@@ -1483,6 +1485,60 @@ const searchingredient = asynchandler(async (req,res)=>{
 
 
 
+
+
+
+const displayemptyingredient = asynchandler(async (req,res)=>{
+
+    
+    const products = await product.find({});
+
+    // Extract all ingredients from the products and add them to a Set to ensure uniqueness
+    const allIngredients = new Set();
+    products.forEach(product => {
+      if (product.ingredients && Array.isArray(product.ingredients)) {
+        product.ingredients.forEach(ingredient => {
+          allIngredients.add(ingredient);
+        });
+      }
+    });
+
+    // Convert the Set back to an Array
+    const uniqueIngredients = Array.from(allIngredients);
+
+    // Convert the Set to an Array for further processing
+    // allIngredients = Array.from(allIngredients);
+
+    // Step 3: Fetch ingredients from the database that have a description
+    const ingredientsWithDescription = await ingredient.find({
+      name: { $in: allIngredients },
+      description: { $exists: true, $ne: null }
+    }, 'name');
+
+    // Extract names of ingredients that have descriptions
+    const ingredientsWithDescriptionNames = ingredientsWithDescription.map(ing => ing.name);
+
+    // Step 4: Find ingredients without descriptions
+    const ingredientsWithoutDescriptions = allIngredients.filter(ingredient => !ingredientsWithDescriptionNames.includes(ingredient));
+
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            uniqueIngredients
+            ,
+            "product fetched sucessfully")
+    )
+
+})
+
+
+
+
 export {
     registerproduct,
     showproduct,
@@ -1497,6 +1553,7 @@ export {
     searchingredient,
     product_ranking,
     update_ingredient,
-    checkbarcode
+    checkbarcode,
+    displayemptyingredient
   
 }

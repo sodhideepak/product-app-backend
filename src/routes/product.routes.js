@@ -15,7 +15,8 @@ import {
     searchingredient,
     product_ranking,
     update_ingredient,
-    checkbarcode
+    checkbarcode,
+    displayemptyingredient
     
   
      } from "../controllers/product.controller.js";
@@ -121,6 +122,12 @@ router.route("/updateproductimages").post( upload.fields([
         }  
     ]),
     updateproductimages)
+
+
+
+
+
+router.route("/displayemptyingredient").get(displayemptyingredient)
 
 
 

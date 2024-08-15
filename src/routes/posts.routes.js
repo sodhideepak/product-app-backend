@@ -15,7 +15,8 @@ import {
     searchingredient,
     product_ranking,
     update_ingredient,
-    checkbarcode
+    checkbarcode,
+    displayemptyingredient
     
   
      } from "../controllers/product.controller.js";
@@ -129,6 +130,7 @@ router.route("/RemoveConsumeProduct/:_id").post(verifyJWT,Remove_From_Consumptio
 
 
 router.route("/update_product_rating").post(update_product_rating)
+
 
 
 // router.route("/updateproductfrontimage").post( upload.fields([
