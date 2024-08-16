@@ -1496,33 +1496,26 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
     const products = await product.find({});
 
     // Extract all ingredients from the products and add them to a Set to ensure uniqueness
-    const allIngredients = new Set();
+    const allIngredientsSet = new Set();
     products.forEach(product => {
       if (product.ingredients && Array.isArray(product.ingredients)) {
         product.ingredients.forEach(ingredient => {
-          allIngredients.add(ingredient);
+          allIngredientsSet.add(ingredient);
         });
       }
     });
 
-    // Convert the Set back to an Array
-    const uniqueIngredients = Array.from(allIngredients);
+    // Convert the Set to an Array
+    const allIngredients = Array.from(allIngredientsSet);
 
-    // Convert the Set to an Array for further processing
-    // allIngredients = Array.from(allIngredients);
+    // Fetch all descriptions from the database
+    const descriptions = await ingredient.find({}, 'ingredient');
+    const ingredientsWithDescriptions = descriptions.map(description => description.ingredient);
 
-    // Step 3: Fetch ingredients from the database that have a description
-    const ingredientsWithDescription = await ingredient.find({
-      name: { $in: allIngredients },
-      description: { $exists: true, $ne: null }
-    }, 'name');
-
-    // Extract names of ingredients that have descriptions
-    const ingredientsWithDescriptionNames = ingredientsWithDescription.map(ing => ing.name);
-
-    // Step 4: Find ingredients without descriptions
-    const ingredientsWithoutDescriptions = allIngredients.filter(ingredient => !ingredientsWithDescriptionNames.includes(ingredient));
-
+    // Filter out ingredients that already have descriptions
+    const ingredientsWithoutDescriptions = allIngredients.filter(ingredient => 
+      !ingredientsWithDescriptions.includes(ingredient)
+    );
 
 
     return res
@@ -1531,7 +1524,7 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
         new ApiResponse(
             200,
             
-            uniqueIngredients
+            ingredientsWithoutDescriptions
             ,
             "product fetched sucessfully")
     )
