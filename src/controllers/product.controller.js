@@ -613,17 +613,17 @@ const searchproduct = asynchandler(async (req,res)=>{
     // const product_data = await product.find( req.query )
 
     const query = req.query
-    // console.log(query);
+    console.log(query);
 
     // const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
     // // console.log(search);
     //     // Match conditions for regex search on product name and keywords
     //     const matchConditions = search ? {
-    //         product_name: { $regex: search, $nin: product.map(p => p.product_name) }
-    //         // $or: [
-    //         //     { product_name: { $regex: search, $options: 'i' } },
-    //         //     // { product_keywords: { $regex: search, $options: 'i' } }
-    //         // ]
+    //         // product_name: { $regex: search, $nin: product.map(p => p.product_name) }
+    //         $or: [
+    //             { product_name: { $regex: search, $options: 'i' } },
+    //             // { product_keywords: { $regex: search, $options: 'i' } }
+    //         ]
     //     } : {};
     // const product_data = await product.aggregate([
     //     {
@@ -788,6 +788,7 @@ const product_data = await product.aggregate([
     {
         $project: {
             _id: 1,
+            product_barcode:1,
             likesCount: 1,
             isliked: 1,
             product_name: 1,
@@ -875,6 +876,7 @@ if (search) {
         {
             $project: {
                 _id: 1,
+                product_barcode:1,
                 likesCount: 1,
                 isliked: 1,
                 product_name: 1,
