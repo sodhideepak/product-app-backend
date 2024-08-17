@@ -1061,8 +1061,8 @@ for (const category of categories) {
         {
             $unwind: '$ratings'
         },
-        { $sort: { 'ratings.product_finalscore': 1 } }, // Sorting by highest ratings
-        { $limit: 20 }
+        { $sort: { 'ratings.product_finalscore': 1 } },
+        // { $limit: 20 }
       ]);
     
     // console.log(topProducts)
@@ -1308,7 +1308,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
           },
           {
             $sort: {
-                product_finalscore: 1 // Sort by ratings in descending order (highest first)
+                rank: 1 // Sort by ratings in descending order (highest first)
             }
           }
         
