@@ -615,24 +615,216 @@ const searchproduct = asynchandler(async (req,res)=>{
     const query = req.query
     // console.log(query);
 
+    // const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
+    // // console.log(search);
+    //     // Match conditions for regex search on product name and keywords
+    //     const matchConditions = search ? {
+    //         product_name: { $regex: search, $nin: product.map(p => p.product_name) }
+    //         // $or: [
+    //         //     { product_name: { $regex: search, $options: 'i' } },
+    //         //     // { product_keywords: { $regex: search, $options: 'i' } }
+    //         // ]
+    //     } : {};
+    // const product_data = await product.aggregate([
+    //     {
+    //         $match: matchConditions
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: 'productratings', // Name of the ratings collection
+    //             localField: '_id',
+    //             foreignField: 'product_id', // Adjust the field name if necessary
+    //             as: 'ratings'
+    //         }
+    //     },
+    //     {
+    //         $unwind: '$ratings'
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: 'likes',
+    //             localField: '_id',
+    //             foreignField: 'product_id',
+    //             as: 'likes'
+    //         }
+    //     },
+    //     {
+    //         $addFields: {
+    //             likesCount: { $size: "$likes" }
+    //         }
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "likes",
+    //             localField: "_id",
+    //             foreignField: "product_id",  // Ensure this field matches the field in likes collection
+    //             as: "isliked",
+    //             pipeline: [
+    //                 {
+    //                     $match: {
+    //                         likedBy: new mongoose.Types.ObjectId(req.user?._id),
+    //                     },
+    //                 },
+    //             ],
+    //         },
+    //     },
+    //     {
+    //         $addFields: {
+    //             likesCount: { $size: "$likes" },
+    //             ratings:  "$ratings" ,
+    //             isliked: {
+    //                 $cond: {
+    //                   if: {
+    //                     $gte: [
+    //                       {
+    //                         // if the isLiked key has document in it
+    //                         $size: "$isliked",
+    //                       },
+    //                       1,
+    //                     ],
+    //                   }, 
+    //                   then: true,
+    //                   else: false,
+    //                 },
+    //               },
+                 
+    //         }
+    //     },
+    //     {
+    //         $project: {
+    //           likesCount: { $size: "$likes" },  
+    //           isliked:1,
+    //           _id: 1,
+    //           likesCount: 1,
+    //           ratings: 1,
+    //           product_barcode: 1,
+    //           product_name:1,
+    //           brand_name:1,
+    //           price:1,
+    //           ingredients:1,
+    //           rank:1,
+    //           product_category:1,
+    //           product_front_image:1,
+    //           fetchCount:1,
+    //           product_finalscore: "$ratings.product_finalscore",
+    //           product_nutriscore: "$ratings.product_nutriscore"
+
+    //         }
+    //       },
+    //       {
+    //         $project:{
+    //             ratings:0
+    //         }
+    //       },
+    //       {
+    //         $sort:{
+    //             product_name:1
+    //         }
+    //       }
+    // ]);
+
+
+
     const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
-    // console.log(search);
-        // Match conditions for regex search on product name and keywords
-        const matchConditions = search ? {
-            $or: [
-                { product_name: { $regex: search, $options: 'i' } },
-                { product_keywords: { $regex: search, $options: 'i' } }
-            ]
-        } : {};
-    const product_data = await product.aggregate([
+
+const product_data = await product.aggregate([
+    {
+        $match: search ? {
+            product_name: { $regex: new RegExp('^' + search, 'i') }
+        } : {}
+    },
+    {
+        $lookup: {
+            from: 'productratings',
+            localField: '_id',
+            foreignField: 'product_id',
+            as: 'ratings'
+        }
+    },
+    {
+        $unwind: '$ratings'
+    },
+    {
+        $lookup: {
+            from: 'likes',
+            localField: '_id',
+            foreignField: 'product_id',
+            as: 'likes'
+        }
+    },
+    {
+        $addFields: {
+            likesCount: { $size: "$likes" }
+        }
+    },
+    {
+        $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "product_id",
+            as: "isliked",
+            pipeline: [
+                {
+                    $match: {
+                        likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                    },
+                },
+            ],
+        },
+    },
+    {
+        $addFields: {
+            isliked: {
+                $cond: {
+                    if: { $gte: [{ $size: "$isliked" }, 1] },
+                    then: true,
+                    else: false,
+                },
+            },
+            product_finalscore: "$ratings.product_finalscore",
+            product_nutriscore: "$ratings.product_nutriscore",
+        }
+    },
+    {
+        $project: {
+            _id: 1,
+            likesCount: 1,
+            isliked: 1,
+            product_name: 1,
+            brand_name: 1,
+            price: 1,
+            ingredients: 1,
+            rank: 1,
+            product_category: 1,
+            product_front_image: 1,
+            fetchCount: 1,
+            product_finalscore: 1,
+            product_nutriscore: 1
+        }
+    },
+    {
+        $sort: {
+            product_name: 1 // Sorting alphabetically
+        }
+    }
+]);
+
+// Fetch additional products that contain the search string but don't start with it
+if (search) {
+    const additionalProducts = await product.aggregate([
         {
-            $match: matchConditions
+            $match: {
+                product_name: { 
+                    $regex: search, 
+                    $nin: product_data.map(p => p.product_name) 
+                }
+            }
         },
         {
             $lookup: {
-                from: 'productratings', // Name of the ratings collection
+                from: 'productratings',
                 localField: '_id',
-                foreignField: 'product_id', // Adjust the field name if necessary
+                foreignField: 'product_id',
                 as: 'ratings'
             }
         },
@@ -656,7 +848,7 @@ const searchproduct = asynchandler(async (req,res)=>{
             $lookup: {
                 from: "likes",
                 localField: "_id",
-                foreignField: "product_id",  // Ensure this field matches the field in likes collection
+                foreignField: "product_id",
                 as: "isliked",
                 pipeline: [
                     {
@@ -669,53 +861,48 @@ const searchproduct = asynchandler(async (req,res)=>{
         },
         {
             $addFields: {
-                likesCount: { $size: "$likes" },
-                ratings:  "$ratings" ,
                 isliked: {
                     $cond: {
-                      if: {
-                        $gte: [
-                          {
-                            // if the isLiked key has document in it
-                            $size: "$isliked",
-                          },
-                          1,
-                        ],
-                      }, 
-                      then: true,
-                      else: false,
+                        if: { $gte: [{ $size: "$isliked" }, 1] },
+                        then: true,
+                        else: false,
                     },
-                  },
-                 
+                },
+                product_finalscore: "$ratings.product_finalscore",
+                product_nutriscore: "$ratings.product_nutriscore",
             }
         },
         {
             $project: {
-              likesCount: { $size: "$likes" },  
-              isliked:1,
-              _id: 1,
-              likesCount: 1,
-              ratings: 1,
-              product_barcode: 1,
-              product_name:1,
-              brand_name:1,
-              price:1,
-              ingredients:1,
-              rank:1,
-              product_category:1,
-              product_front_image:1,
-              fetchCount:1,
-              product_finalscore: "$ratings.product_finalscore",
-              product_nutriscore: "$ratings.product_nutriscore"
-
+                _id: 1,
+                likesCount: 1,
+                isliked: 1,
+                product_name: 1,
+                brand_name: 1,
+                price: 1,
+                ingredients: 1,
+                rank: 1,
+                product_category: 1,
+                product_front_image: 1,
+                fetchCount: 1,
+                product_finalscore: 1,
+                product_nutriscore: 1
             }
-          },
-          {
-            $project:{
-                ratings:0
+        },
+        {
+            $sort: {
+                product_name: 1 // Sorting alphabetically
             }
-          }
+        }
     ]);
+
+    product_data.push(...additionalProducts); // Combine both sets of products
+}
+
+
+
+
+
 
     if (!product_data) {
         throw new ApiError(400, "product does not exist")
