@@ -613,7 +613,7 @@ const searchproduct = asynchandler(async (req,res)=>{
     // const product_data = await product.find( req.query )
 
     const query = req.query
-    console.log(query);
+    // console.log(query);
 
     // const search = typeof query.search === 'string' && query.search.trim() !== '' ? query.search.trim() : null;
     // // console.log(search);
@@ -1723,6 +1723,31 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
 
 
 
+
+
+
+const products_count = asynchandler(async (req,res)=>{
+
+    
+    const products = await product.countDocuments({});
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            {total_products:products}
+            ,
+            "product fetched sucessfully")
+    )
+
+})
+
+
+
+
 export {
     registerproduct,
     showproduct,
@@ -1738,6 +1763,7 @@ export {
     product_ranking,
     update_ingredient,
     checkbarcode,
-    displayemptyingredient
+    displayemptyingredient,
+    products_count
   
 }

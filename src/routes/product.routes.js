@@ -16,7 +16,8 @@ import {
     product_ranking,
     update_ingredient,
     checkbarcode,
-    displayemptyingredient
+    displayemptyingredient,
+    products_count
     
   
      } from "../controllers/product.controller.js";
@@ -91,6 +92,10 @@ router.route("/liked_product").get(verifyJWT,liked_product)
 
 
 router.route("/update_product_rating").post(update_product_rating)
+
+
+router.route("/products_count").get(products_count)
+
 
 
 // router.route("/updateproductfrontimage").post( upload.fields([
