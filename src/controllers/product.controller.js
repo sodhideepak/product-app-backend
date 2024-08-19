@@ -1707,13 +1707,24 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
     );
 
 
+    const uniqueIngredientsCount = await product.aggregate([
+        // Unwind the ingredients array to get individual ingredients
+        { $unwind: '$ingredients' },
+        // Group by ingredient name to get unique ingredients
+        { $group: { _id: '$ingredients' } },
+        // Count the number of unique ingredients
+        { $count: 'uniqueIngredientsCount' }
+    ]);
+
+    
+
     return res
     .status(200)
     .json(
         new ApiResponse(
             200,
-            
-            ingredientsWithoutDescriptions
+            {all:uniqueIngredientsCount,
+            unique:ingredientsWithoutDescriptions}
             ,
             "product fetched sucessfully")
     )
