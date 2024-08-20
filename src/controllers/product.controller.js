@@ -501,6 +501,38 @@ const showproduct = asynchandler(async (req,res)=>{
         //         }
         //     }
         // },  
+        // {
+        //     $addFields: {
+        //         'product.ingredients': {
+        //             $map: {
+        //                 input: "$ingredients",
+        //                 as: "ingredient",
+        //                 in: {
+        //                     $mergeObjects: [
+        //                         { name: "$$ingredient" },
+        //                         {
+        //                             $arrayElemAt: [
+        //                                 {
+        //                                     $filter: {
+        //                                         input: "$ingredientDetails",
+        //                                         as: "detail",
+        //                                         cond: {
+        //                                             $in: ["$$ingredient", "$$detail.keywords"]
+        //                                         }
+        //                                     }
+        //                                 },
+        //                                 0
+        //                             ]
+        //                         }
+        //                     ]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
+
+
+
         {
             $addFields: {
                 'product.ingredients': {
@@ -511,18 +543,30 @@ const showproduct = asynchandler(async (req,res)=>{
                             $mergeObjects: [
                                 { name: "$$ingredient" },
                                 {
-                                    $arrayElemAt: [
-                                        {
-                                            $filter: {
-                                                input: "$ingredientDetails",
-                                                as: "detail",
-                                                cond: {
-                                                    $in: ["$$ingredient", "$$detail.keywords"]
-                                                }
+                                    $let: {
+                                        vars: {
+                                            matchingDetail: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: "$ingredientDetails",
+                                                            as: "detail",
+                                                            cond: {
+                                                                $in: ["$$ingredient", "$$detail.keywords"]
+                                                            }
+                                                        }
+                                                    },
+                                                    0
+                                                ]
                                             }
                                         },
-                                        0
-                                    ]
+                                        in: {
+                                            $mergeObjects: [
+                                                "$$matchingDetail",
+                                                { name: "$$ingredient" }
+                                            ]
+                                        }
+                                    }
                                 }
                             ]
                         }
@@ -1676,6 +1720,13 @@ const update_ingredient = asynchandler(async (req,res)=>{
 
 
 
+
+
+
+
+
+
+
 const searchingredient = asynchandler(async (req,res)=>{
 
     
@@ -1739,58 +1790,17 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
           
             }
         },
-        // {
-        //     $addFields: {
-        //         'product.ingredients': {
-        //             $map: {
-        //                 input: "$ingredients",
-        //                 as: "ingredient",
-        //                 in: {
-        //                     $mergeObjects: [
-        //                         { name: "$$ingredient" },
-        //                         {
-        //                             $arrayElemAt: [
-        //                                 {
-        //                                     $filter: {
-        //                                         input: "$ingredientDetails",
-        //                                         as: "detail",
-        //                                         cond: { $eq: ["$$detail.name", "$$ingredient"] }
-        //                                     }
-        //                                 },
-        //                                 0
-        //                             ]
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },  
-        // {
-        //     $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
-        // },   
         {
             $project:{
              
-                ingredients: 1 ,
+                // products_count: 1 ,
+                ingredients:1,
                 ingredientDetails:1
                 // 'nutritional_value.k': 0
 
 
             }
         },
-      
-        // {
-        //     $project:{
-             
-        //         ingredientDetails: 0 ,
-        //         'ingredients._id':0,
-        //         'nutritional_value.k': 0
-
-
-        //     }
-        // }
-        
 
 
 
@@ -1805,7 +1815,7 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
         { $count: 'uniqueIngredientsCount' }
     ]);
 
-
+    
 
 
     const uniqueUnmatchedIngredients = new Set();
@@ -1838,14 +1848,16 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
     // Convert the set to an array and return it
     const uniqueIngredientsArray = Array.from(uniqueUnmatchedIngredients);
 
+
     return res
     .status(200)
     .json(
         new ApiResponse(
             200,
-            {all:uniqueIngredientsCount,
-            unique:uniqueIngredientsArray,
-        response:response}
+            {all_products_count:uniqueIngredientsCount[0].uniqueIngredientsCount,
+            products_not_registered_count:uniqueIngredientsArray.length,
+            products_not_registered:uniqueIngredientsArray
+            }
             ,
             "product fetched sucessfully")
     )
