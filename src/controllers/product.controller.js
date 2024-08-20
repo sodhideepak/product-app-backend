@@ -474,6 +474,33 @@ const showproduct = asynchandler(async (req,res)=>{
           
             }
         },
+        // {
+        //     $addFields: {
+        //         'product.ingredients': {
+        //             $map: {
+        //                 input: "$ingredients",
+        //                 as: "ingredient",
+        //                 in: {
+        //                     $mergeObjects: [
+        //                         { name: "$$ingredient" },
+        //                         {
+        //                             $arrayElemAt: [
+        //                                 {
+        //                                     $filter: {
+        //                                         input: "$ingredientDetails",
+        //                                         as: "detail",
+        //                                         cond: { $eq: ["$$detail.name", "$$ingredient"] }
+        //                                     }
+        //                                 },
+        //                                 0
+        //                             ]
+        //                         }
+        //                     ]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },  
         {
             $addFields: {
                 'product.ingredients': {
@@ -489,7 +516,9 @@ const showproduct = asynchandler(async (req,res)=>{
                                             $filter: {
                                                 input: "$ingredientDetails",
                                                 as: "detail",
-                                                cond: { $eq: ["$$detail.name", "$$ingredient"] }
+                                                cond: {
+                                                    $in: ["$$ingredient", "$$detail.keywords"]
+                                                }
                                             }
                                         },
                                         0
@@ -500,7 +529,8 @@ const showproduct = asynchandler(async (req,res)=>{
                     }
                 }
             }
-        },  
+        },
+        
         {
             $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
         },   
@@ -1682,30 +1712,89 @@ const searchingredient = asynchandler(async (req,res)=>{
 const displayemptyingredient = asynchandler(async (req,res)=>{
 
     
-    const products = await product.find({});
 
-    // Extract all ingredients from the products and add them to a Set to ensure uniqueness
-    const allIngredientsSet = new Set();
-    products.forEach(product => {
-      if (product.ingredients && Array.isArray(product.ingredients)) {
-        product.ingredients.forEach(ingredient => {
-          allIngredientsSet.add(ingredient);
-        });
-      }
-    });
+    const response = await product.aggregate([
+          { $unwind: {
+            path: '$ingredients'
+          } },
+        {
+            $lookup: {
+              from: "ingredients",
+              localField: "ingredients",
+              foreignField: "keywords",
+              as: "ingredientDetails"
+            }
+        },
+        { $unwind:  {
+            path: '$ingredientDetails',
+            preserveNullAndEmptyArrays: true // To include products without ratings
+          } },
+         
+        {
+            $group: {
+              _id: "$_id",
+              product: { $first: "$$ROOT" }, 
+              ingredients: { $push: "$ingredients" },
+              ingredientDetails: { $push: "$ingredientDetails" },
+          
+            }
+        },
+        // {
+        //     $addFields: {
+        //         'product.ingredients': {
+        //             $map: {
+        //                 input: "$ingredients",
+        //                 as: "ingredient",
+        //                 in: {
+        //                     $mergeObjects: [
+        //                         { name: "$$ingredient" },
+        //                         {
+        //                             $arrayElemAt: [
+        //                                 {
+        //                                     $filter: {
+        //                                         input: "$ingredientDetails",
+        //                                         as: "detail",
+        //                                         cond: { $eq: ["$$detail.name", "$$ingredient"] }
+        //                                     }
+        //                                 },
+        //                                 0
+        //                             ]
+        //                         }
+        //                     ]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },  
+        // {
+        //     $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
+        // },   
+        {
+            $project:{
+             
+                ingredients: 1 ,
+                ingredientDetails:1
+                // 'nutritional_value.k': 0
 
-    // Convert the Set to an Array
-    const allIngredients = Array.from(allIngredientsSet);
 
-    // Fetch all descriptions from the database
-    const descriptions = await ingredient.find({}, 'ingredient');
-    const ingredientsWithDescriptions = descriptions.map(description => description.ingredient);
+            }
+        },
+      
+        // {
+        //     $project:{
+             
+        //         ingredientDetails: 0 ,
+        //         'ingredients._id':0,
+        //         'nutritional_value.k': 0
 
-    // Filter out ingredients that already have descriptions
-    const ingredientsWithoutDescriptions = allIngredients.filter(ingredient => 
-      !ingredientsWithDescriptions.includes(ingredient)
-    );
 
+        //     }
+        // }
+        
+
+
+
+    ]);
 
     const uniqueIngredientsCount = await product.aggregate([
         // Unwind the ingredients array to get individual ingredients
@@ -1716,7 +1805,38 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
         { $count: 'uniqueIngredientsCount' }
     ]);
 
-    
+
+
+
+    const uniqueUnmatchedIngredients = new Set();
+
+    // Iterate over each product
+    response.forEach(product => {
+      const ingredients = product.ingredients || [];
+      const ingredientDetails = product.ingredientDetails || [];
+
+      // Iterate over ingredients in the product
+      ingredients.forEach(ingredient => {
+        let isMatched = false;
+
+        // Check if the ingredient matches any of the keywords in ingredientDetails
+        for (const detail of ingredientDetails) {
+          const keywords = detail.keywords || [];
+          if (keywords.includes(ingredient)) {
+            isMatched = true;
+            break;
+          }
+        }
+
+        // If the ingredient does not match any keyword, add it to the set
+        if (!isMatched) {
+          uniqueUnmatchedIngredients.add(ingredient);
+        }
+      });
+    });
+
+    // Convert the set to an array and return it
+    const uniqueIngredientsArray = Array.from(uniqueUnmatchedIngredients);
 
     return res
     .status(200)
@@ -1724,7 +1844,8 @@ const displayemptyingredient = asynchandler(async (req,res)=>{
         new ApiResponse(
             200,
             {all:uniqueIngredientsCount,
-            unique:ingredientsWithoutDescriptions}
+            unique:uniqueIngredientsArray,
+        response:response}
             ,
             "product fetched sucessfully")
     )
