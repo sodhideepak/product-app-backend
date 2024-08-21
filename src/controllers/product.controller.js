@@ -1762,7 +1762,7 @@ const searchingredient = asynchandler(async (req,res)=>{
 
 const displayemptyingredient = asynchandler(async (req,res)=>{
 
-    
+     
 
     const response = await product.aggregate([
           { $unwind: {
