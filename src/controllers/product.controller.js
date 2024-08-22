@@ -14,22 +14,22 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber) {
     // Convert kcal to kJ (1 kcal = 4.184 kJ)
-    let energy = kcal * 4.184;
+    // let energy = kcal * 4.184;
     // let energy = kcal * 0;
 
     // Define thresholds for negative points
     const negativePoints = {
         energy: [
-            { threshold: 335, points: 0 },
-            { threshold: 670, points: 1 },
-            { threshold: 1005, points: 2 },
-            { threshold: 1340, points: 3 },
-            { threshold: 1675, points: 4 },
-            { threshold: 2010, points: 5 },
-            { threshold: 2345, points: 6 },
-            { threshold: 2680, points: 7 },
-            { threshold: 3015, points: 8 },
-            { threshold: 3350, points: 9 },
+            { threshold: 80, points: 0 },
+            { threshold: 160, points: 1 },
+            { threshold: 240, points: 2 },
+            { threshold: 320, points: 3 },
+            { threshold: 400, points: 4 },
+            { threshold: 480, points: 5 },
+            { threshold: 560, points: 6 },
+            { threshold: 640, points: 7 },
+            { threshold: 720, points: 8 },
+            { threshold: 800, points: 9 },
             { threshold: Infinity, points: 10 }
         ],
         sugars: [
@@ -153,26 +153,20 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
 
 
 
-
-
-function calculate_ml_NutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber) {
-    // Convert kcal to kJ (1 kcal = 4.184 kJ)
-    let energy = kcal * 4.184;
-    // let energy = kcal * 0;
-
-    // Define thresholds for negative points
+function calculate_ml_NutriScore(kcal, sugars, saturatedFat, sodium, fruitsVegetablesPercentage, fiber, protein) {
+    // Define thresholds for negative points (A, B, C, D)
     const negativePoints = {
         energy: [
-            { threshold: 335, points: 0 },
-            { threshold: 670, points: 1 },
-            { threshold: 1005, points: 2 },
-            { threshold: 1340, points: 3 },
-            { threshold: 1675, points: 4 },
-            { threshold: 2010, points: 5 },
-            { threshold: 2345, points: 6 },
-            { threshold: 2680, points: 7 },
-            { threshold: 3015, points: 8 },
-            { threshold: 3350, points: 9 },
+            { threshold: 0, points: 0 },
+            { threshold: 7.2, points: 1 },
+            { threshold: 14.3, points: 2 },
+            { threshold: 21.5, points: 3 },
+            { threshold: 28.5, points: 4 },
+            { threshold: 35.9, points: 5 },
+            { threshold: 43.0, points: 6 },
+            { threshold: 50.2, points: 7 },
+            { threshold: 57.4, points: 8 },
+            { threshold: 64.5, points: 9 },
             { threshold: Infinity, points: 10 }
         ],
         sugars: [
@@ -184,7 +178,7 @@ function calculate_ml_NutriScore(kcal, carbs, fats, protein, sodium,fruitsVegeta
             { threshold: 7.5, points: 5 },
             { threshold: 9.0, points: 6 },
             { threshold: 10.5, points: 7 },
-            { threshold: 12.0, points: 8 },
+            { threshold: 12, points: 8 },
             { threshold: 13.5, points: 9 },
             { threshold: Infinity, points: 10 }
         ],
@@ -216,20 +210,20 @@ function calculate_ml_NutriScore(kcal, carbs, fats, protein, sodium,fruitsVegeta
         ]
     };
 
-    // Define thresholds for positive points
+    // Define thresholds for positive points (E, F, G)
     const positivePoints = {
         fruitsVegetables: [
             { threshold: 40, points: 0 },
             { threshold: 60, points: 2 },
             { threshold: 80, points: 4 },
-            { threshold: Infinity, points: 10 }
+            { threshold: Infinity, points: 5 }
         ],
         fiber: [
-            { threshold: 0.9, points: 0 },
-            { threshold: 1.9, points: 1 },
-            { threshold: 2.8, points: 2 },
-            { threshold: 3.7, points: 3 },
-            { threshold: 4.7, points: 4 },
+            { threshold: 0.7, points: 0 },
+            { threshold: 1.4, points: 1 },
+            { threshold: 2.1, points: 2 },
+            { threshold: 2.8, points: 3 },
+            { threshold: 3.5, points: 4 },
             { threshold: Infinity, points: 5 }
         ],
         protein: [
@@ -241,39 +235,28 @@ function calculate_ml_NutriScore(kcal, carbs, fats, protein, sodium,fruitsVegeta
             { threshold: Infinity, points: 5 }
         ]
     };
-// console.log(thresholds)
-// console.log(thresholds.length)
-    // Calculate negative points
+
+    // Helper function to get points based on thresholds
     function getPoints(value, thresholds) {
-        
         for (let i = 0; i < thresholds.length; i++) {
             if (value <= thresholds[i].threshold) {
-                // console.log(thresholds[i].points);
                 return thresholds[i].points;
             }
         }
     }
 
-    let negativeScore = getPoints(energy, negativePoints.energy) +
-                        getPoints(carbs, negativePoints.sugars) +
-                        getPoints(fats, negativePoints.saturatedFat) +
+    // Calculate negative points
+    let negativeScore = getPoints(kcal, negativePoints.energy) +
+                        getPoints(sugars, negativePoints.sugars) +
+                        getPoints(saturatedFat, negativePoints.saturatedFat) +
                         getPoints(sodium, negativePoints.sodium);
 
-    // For the example, let's assume 0% fruits/vegetables and fiber as we don't have those values
-    // let fruitsVegetablesPercentage = 19.5;
-    // let fiber = 0;
-
-    // console.log("1",fruitsVegetablesPercentage);
-    // console.log("2",fiber);
-    // console.log("3",protein); 
-
+    // Calculate positive points
     let positiveScore = getPoints(fruitsVegetablesPercentage, positivePoints.fruitsVegetables) +
                         getPoints(fiber, positivePoints.fiber) +
                         getPoints(protein, positivePoints.protein);
 
     // Calculate final score
-    // console.log(negativeScore);
-    // console.log(positiveScore);
     let finalScore = negativeScore - positiveScore;
 
     // Determine Nutri-Score
