@@ -74,7 +74,7 @@ router.route("/searchingredient").get(searchingredient)
 
 
 
-router.route("/product_ranking").get(product_ranking)
+router.route("/product_ranking").post(product_ranking)
 
 
 

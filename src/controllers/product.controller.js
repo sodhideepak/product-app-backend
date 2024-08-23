@@ -12,66 +12,188 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 
 
-function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber) {
+function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber,category_to_check) {
     // Convert kcal to kJ (1 kcal = 4.184 kJ)
-    // let energy = kcal * 4.184;
-    // let energy = kcal * 0;
+    let energy = kcal ;
+    // console.log(category_to_check);
+    // let energy = kcal * 0; 
+    let negativePoints;
+    let category = ['beverage','diary','juice'];
+    if (category.includes(category_to_check)) {
+        // console.log("in the beverage");
+        
+        
+         negativePoints = {
+        
+            energy: [
+                { threshold: 0, points: 0 },
+                { threshold: 7.2, points: 1 },
+                { threshold: 14.3, points: 2 },
+                { threshold: 21.5, points: 3 },
+                { threshold: 28.5, points: 4 },
+                { threshold: 35.9, points: 5 },
+                { threshold: 43.0, points: 6 },
+                { threshold: 50.2, points: 7 },
+                { threshold: 57.4, points: 8 },
+                { threshold: 64.5, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            sugars: [
+                { threshold: 0, points: 0 },
+                { threshold: 1.5, points: 1 },
+                { threshold: 3.0, points: 2 },
+                { threshold: 4.5, points: 3 },
+                { threshold: 6.0, points: 4 },
+                { threshold: 7.5, points: 5 },
+                { threshold: 9.0, points: 6 },
+                { threshold: 10.5, points: 7 },
+                { threshold: 12, points: 8 },
+                { threshold: 13.5, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            saturatedFat: [
+                { threshold: 1, points: 0 },
+                { threshold: 2, points: 1 },
+                { threshold: 3, points: 2 },
+                { threshold: 4, points: 3 },
+                { threshold: 5, points: 4 },
+                { threshold: 6, points: 5 },
+                { threshold: 7, points: 6 },
+                { threshold: 8, points: 7 },
+                { threshold: 9, points: 8 },
+                { threshold: 10, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            sodium: [
+                { threshold: 90, points: 0 },
+                { threshold: 180, points: 1 },
+                { threshold: 270, points: 2 },
+                { threshold: 360, points: 3 },
+                { threshold: 450, points: 4 },
+                { threshold: 540, points: 5 },
+                { threshold: 630, points: 6 },
+                { threshold: 720, points: 7 },
+                { threshold: 810, points: 8 },
+                { threshold: 900, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ]
+        };
+    } else {
+        // console.log("nonbeverage");
+        
+         negativePoints = {
+        
+            energy: [
+                { threshold: 80, points: 0 },
+                { threshold: 160, points: 1 },
+                { threshold: 240, points: 2 },
+                { threshold: 320, points: 3 },
+                { threshold: 400, points: 4 },
+                { threshold: 480, points: 5 },
+                { threshold: 560, points: 6 },
+                { threshold: 640, points: 7 },
+                { threshold: 720, points: 8 },
+                { threshold: 800, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            sugars: [
+                { threshold: 4.5, points: 0 },
+                { threshold: 9, points: 1 },
+                { threshold: 13.5, points: 2 },
+                { threshold: 18, points: 3 },
+                { threshold: 22.5, points: 4 },
+                { threshold: 27, points: 5 },
+                { threshold: 31, points: 6 },
+                { threshold: 36, points: 7 },
+                { threshold: 40, points: 8 },
+                { threshold: 45, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            saturatedFat: [
+                { threshold: 1, points: 0 },
+                { threshold: 2, points: 1 },
+                { threshold: 3, points: 2 },
+                { threshold: 4, points: 3 },
+                { threshold: 5, points: 4 },
+                { threshold: 6, points: 5 },
+                { threshold: 7, points: 6 },
+                { threshold: 8, points: 7 },
+                { threshold: 9, points: 8 },
+                { threshold: 10, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ],
+            sodium: [
+                { threshold: 90, points: 0 },
+                { threshold: 180, points: 1 },
+                { threshold: 270, points: 2 },
+                { threshold: 360, points: 3 },
+                { threshold: 450, points: 4 },
+                { threshold: 540, points: 5 },
+                { threshold: 630, points: 6 },
+                { threshold: 720, points: 7 },
+                { threshold: 810, points: 8 },
+                { threshold: 900, points: 9 },
+                { threshold: Infinity, points: 10 }
+            ]
+        };
+    }
 
     // Define thresholds for negative points
-    const negativePoints = {
-        energy: [
-            { threshold: 80, points: 0 },
-            { threshold: 160, points: 1 },
-            { threshold: 240, points: 2 },
-            { threshold: 320, points: 3 },
-            { threshold: 400, points: 4 },
-            { threshold: 480, points: 5 },
-            { threshold: 560, points: 6 },
-            { threshold: 640, points: 7 },
-            { threshold: 720, points: 8 },
-            { threshold: 800, points: 9 },
-            { threshold: Infinity, points: 10 }
-        ],
-        sugars: [
-            { threshold: 4.5, points: 0 },
-            { threshold: 9, points: 1 },
-            { threshold: 13.5, points: 2 },
-            { threshold: 18, points: 3 },
-            { threshold: 22.5, points: 4 },
-            { threshold: 27, points: 5 },
-            { threshold: 31, points: 6 },
-            { threshold: 36, points: 7 },
-            { threshold: 40, points: 8 },
-            { threshold: 45, points: 9 },
-            { threshold: Infinity, points: 10 }
-        ],
-        saturatedFat: [
-            { threshold: 1, points: 0 },
-            { threshold: 2, points: 1 },
-            { threshold: 3, points: 2 },
-            { threshold: 4, points: 3 },
-            { threshold: 5, points: 4 },
-            { threshold: 6, points: 5 },
-            { threshold: 7, points: 6 },
-            { threshold: 8, points: 7 },
-            { threshold: 9, points: 8 },
-            { threshold: 10, points: 9 },
-            { threshold: Infinity, points: 10 }
-        ],
-        sodium: [
-            { threshold: 90, points: 0 },
-            { threshold: 180, points: 1 },
-            { threshold: 270, points: 2 },
-            { threshold: 360, points: 3 },
-            { threshold: 450, points: 4 },
-            { threshold: 540, points: 5 },
-            { threshold: 630, points: 6 },
-            { threshold: 720, points: 7 },
-            { threshold: 810, points: 8 },
-            { threshold: 900, points: 9 },
-            { threshold: Infinity, points: 10 }
-        ]
-    };
+    // const negativePoints = {
+
+    //     energy: [
+    //         { threshold: 80, points: 0 },
+    //         { threshold: 160, points: 1 },
+    //         { threshold: 240, points: 2 },
+    //         { threshold: 320, points: 3 },
+    //         { threshold: 400, points: 4 },
+    //         { threshold: 480, points: 5 },
+    //         { threshold: 560, points: 6 },
+    //         { threshold: 640, points: 7 },
+    //         { threshold: 720, points: 8 },
+    //         { threshold: 800, points: 9 },
+    //         { threshold: Infinity, points: 10 }
+    //     ],
+    //     sugars: [
+    //         { threshold: 4.5, points: 0 },
+    //         { threshold: 9, points: 1 },
+    //         { threshold: 13.5, points: 2 },
+    //         { threshold: 18, points: 3 },
+    //         { threshold: 22.5, points: 4 },
+    //         { threshold: 27, points: 5 },
+    //         { threshold: 31, points: 6 },
+    //         { threshold: 36, points: 7 },
+    //         { threshold: 40, points: 8 },
+    //         { threshold: 45, points: 9 },
+    //         { threshold: Infinity, points: 10 }
+    //     ],
+    //     saturatedFat: [
+    //         { threshold: 1, points: 0 },
+    //         { threshold: 2, points: 1 },
+    //         { threshold: 3, points: 2 },
+    //         { threshold: 4, points: 3 },
+    //         { threshold: 5, points: 4 },
+    //         { threshold: 6, points: 5 },
+    //         { threshold: 7, points: 6 },
+    //         { threshold: 8, points: 7 },
+    //         { threshold: 9, points: 8 },
+    //         { threshold: 10, points: 9 },
+    //         { threshold: Infinity, points: 10 }
+    //     ],
+    //     sodium: [
+    //         { threshold: 90, points: 0 },
+    //         { threshold: 180, points: 1 },
+    //         { threshold: 270, points: 2 },
+    //         { threshold: 360, points: 3 },
+    //         { threshold: 450, points: 4 },
+    //         { threshold: 540, points: 5 },
+    //         { threshold: 630, points: 6 },
+    //         { threshold: 720, points: 7 },
+    //         { threshold: 810, points: 8 },
+    //         { threshold: 900, points: 9 },
+    //         { threshold: Infinity, points: 10 }
+    //     ]
+    // };
 
     // Define thresholds for positive points
     const positivePoints = {
@@ -110,6 +232,13 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
             }
         }
     }
+
+// console.log(getPoints(energy, negativePoints.energy), 
+// getPoints(carbs, negativePoints.sugars) ,
+// getPoints(fats, negativePoints.saturatedFat), 
+// getPoints(sodium, negativePoints.sodium))
+
+
 
     let negativeScore = getPoints(energy, negativePoints.energy) +
                         getPoints(carbs, negativePoints.sugars) +
@@ -1644,28 +1773,49 @@ const update_product_rating = asynchandler(async(req,res)=>{
 
 
     const products = await product.find();
-    console.log(products)
+    // console.log(products)
     for (const productt of products) {
+
+
+
+
       // Calculate the new rating
     //   const newRating = calculateNewRating(product.nutritionalInfo);
 // console.log(products);
 // console.log(products[0].nutritional_value.energy);
 
+    // console.log(productt.product_category);
     
     const {finalScore,
         nutriScore
           }= calculateNutriScore(
-            products[0].nutritional_value.energy,
-            products[0].nutritional_value.total_carbohydrates,   
-            products[0].nutritional_value.fats.saturates_fats,  
-            products[0].nutritional_value.protein,   
-            products[0].nutritional_value.sodium,
-            products[0].fruitsVegetablesPercentage,
-            products[0].nutritional_value.carbohydrates.dietry_fibre
+            productt.nutritional_value.energy,
+            productt.nutritional_value.total_carbohydrates,   
+            productt.nutritional_value.fats.saturates_fats,  
+            productt.nutritional_value.protein,   
+            productt.nutritional_value.sodium,
+            productt.fruitsVegetablesPercentage,
+            productt.nutritional_value.carbohydrates.dietry_fibre,
+            productt.product_category
           )
 
+
+
+        //   const {finalScore,
+        //     nutriScore
+        //       }= calculateNutriScore(
+        //         14.5,
+        //         5,   
+        //         4,  
+        //         4,   
+        //         451,
+        //         20,
+        //         5,
+        //         "lays"
+        //       )
+
     
-      // Update the product rating in the ProductRating collection
+    //   Update the product rating in the ProductRating collection
       await productrating.updateOne(
         { product_id: productt._id },
         { $set: { product_finalscore:finalScore,
@@ -1693,6 +1843,8 @@ const update_product_rating = asynchandler(async(req,res)=>{
             200,
             {
                 product_data
+            //     finalScore,
+            // nutriScore
             },
             "ratings updated sucessfully")
     )
