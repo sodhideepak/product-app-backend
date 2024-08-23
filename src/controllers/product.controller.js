@@ -128,7 +128,7 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
                         getPoints(fiber, positivePoints.fiber) +
                         getPoints(protein, positivePoints.protein);
 
-    // Calculate final score
+    // Calculate final score    
     // console.log(negativeScore);
     // console.log(positiveScore);
     let finalScore = negativeScore - positiveScore;
