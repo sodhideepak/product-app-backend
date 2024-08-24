@@ -1066,7 +1066,7 @@ const product_data = await product.aggregate([
         $match: search ? {
             $or: [
                 { product_name: { $regex: new RegExp('^' + search, 'i') } },
-                { keywords: { $regex: new RegExp(search, 'i') } } // You can remove ^ if you want to match anywhere in the keywords
+                { product_keywords: { $regex: new RegExp(search, 'i') } } // You can remove ^ if you want to match anywhere in the keywords
             ]
         } : {}
     },
