@@ -287,14 +287,14 @@ const consumed_products = asynchandler(async (req, res) => {
   let consumedproductdata;
   let totalproductconsumed;
   switch (condition) {
-    case 'today':
-      consumedproductdata = products_data.filter(item => item.isToday);
-      totalproductconsumed = consumedproductdata.length;
-      break;
-    case 'yesterday':
-      consumedproductdata = products_data.filter(item => item.isYesterday);
-      totalproductconsumed = consumedproductdata.length;
-      break;
+    // case 'today':
+    //   consumedproductdata = products_data.filter(item => item.isToday);
+    //   totalproductconsumed = consumedproductdata.length;
+    //   break;
+    // case 'yesterday':
+    //   consumedproductdata = products_data.filter(item => item.isYesterday);
+    //   totalproductconsumed = consumedproductdata.length;
+    //   break;
     case 'currentweek':
       consumedproductdata = products_data.filter(item => item.isThisWeek);
       totalproductconsumed = consumedproductdata.length;
@@ -311,10 +311,10 @@ const consumed_products = asynchandler(async (req, res) => {
       consumedproductdata = products_data.filter(item => item.isFourthLastWeek);
       totalproductconsumed = consumedproductdata.length;
       break;
-    case 'month':
-      consumedproductdata = products_data.filter(item => item.isThisMonth);
-      totalproductconsumed = consumedproductdata.length;
-      break;
+    // case 'month':
+    //   consumedproductdata = products_data.filter(item => item.isThisMonth);
+    //   totalproductconsumed = consumedproductdata.length;
+    //   break;
     default :
     consumedproductdata = products_data.filter(item => item.isThisWeek);
     totalproductconsumed = consumedproductdata.length;
@@ -363,10 +363,10 @@ consumedproductdata.forEach(product => {
     // console.log(condition);
   
     switch (condition) {
-      case 'currentWeek':
+      case 'currentweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -374,7 +374,7 @@ consumedproductdata.forEach(product => {
       case 'lastweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().subtract(1, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            date: moment().subtract(1, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -382,7 +382,7 @@ consumedproductdata.forEach(product => {
       case 'thirdlastweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().subtract(2, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            date: moment().subtract(2, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -390,7 +390,7 @@ consumedproductdata.forEach(product => {
         case 'fourthlastweek':
           for (let i = 0; i < 7; i++) {
             daysOfWeek.push({
-              date: moment().subtract(3, 'weeks').startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+              date: moment().subtract(3, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
               products: []
             });
           }
@@ -398,7 +398,7 @@ consumedproductdata.forEach(product => {
       default:
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().startOf('week').add(i, 'days').format('YYYY-MM-DD'),
+            date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -415,13 +415,8 @@ consumedproductdata.forEach(product => {
 
 
 
-
-
-
-
-
 consumedproductdata.forEach(product => {
-  const consumedDate = moment(product.consumed_At_date_converted).format('YYYY-MM-DD');
+  const consumedDate = moment(product.consumed_At_date_converted).format('DD/MM/YYYY');
   const dayIndex = weekData.findIndex(day => day.date === consumedDate);
 
   if (dayIndex !== -1) {
@@ -466,6 +461,40 @@ consumedproductdata.forEach(product => {
 });
 
 
+function getWeekDataconditions(currentWeek) {
+  // Define the list of weeks in order
+  const weeks = ["fourthlastweek", "thirdlastweek", "lastweek", "currentweek"];
+
+  // Ensure the current week is in the list
+  if (!weeks.includes(currentWeek)) {
+      return { error: "Invalid week name" };
+  }
+
+  // Find the index of the current week
+  const currentIndex = weeks.indexOf(currentWeek);
+
+  // Determine if there are previous and next weeks
+  const hasPreviousWeek = currentIndex > 0;
+  const hasNextWeek = currentIndex < weeks.length - 1;
+
+  // Get the previous and next week names if they exist
+  const previousWeek = hasPreviousWeek ? weeks[currentIndex - 1] : null;
+  const nextWeek = hasNextWeek ? weeks[currentIndex + 1] : null;
+
+  // Return the result as an object
+  return {
+      hasNextWeek: hasNextWeek,
+      hasPreviousWeek: hasPreviousWeek,
+      currentWeek: currentWeek,
+      nextWeek: nextWeek || "None",
+      previousWeek: previousWeek || "None"
+  };
+}
+
+// Example usage
+const weekDatacondition = getWeekDataconditions(condition);
+// console.log(weekData);
+
 
 
   
@@ -474,7 +503,8 @@ consumedproductdata.forEach(product => {
         200,
         {
           weekData,
-          totalNutritionalValue,totalproductconsumed
+          totalNutritionalValue,totalproductconsumed,
+          weekDatacondition
         },
         "products fetched sucessfully"
       )
@@ -500,6 +530,8 @@ const consumed_products_day = asynchandler(async (req, res) => {
 console.log(Userid);
 
   const { date } = req.query;
+  console.log(date);
+  
   const dateObject = moment(date, "YYYY-MM-DD").toDate();
 
   console.log(date);
@@ -758,6 +790,8 @@ const getMonthlyReport = async (req, res) => {
       )
     );
   }
+
+
 
 
   export { ConsumeProduct, 
