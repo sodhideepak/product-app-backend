@@ -1064,7 +1064,10 @@ const searchproduct = asynchandler(async (req,res)=>{
 const product_data = await product.aggregate([
     {
         $match: search ? {
-            product_name: { $regex: new RegExp('^' + search, 'i') }
+            $or: [
+                { product_name: { $regex: new RegExp('^' + search, 'i') } },
+                { keywords: { $regex: new RegExp(search, 'i') } } // You can remove ^ if you want to match anywhere in the keywords
+            ]
         } : {}
     },
     {

@@ -527,15 +527,15 @@ const weekDatacondition = getWeekDataconditions(condition);
 const consumed_products_day = asynchandler(async (req, res) => {
   const  User  = req.user;
   const  Userid  = User._id;
-console.log(Userid);
+// console.log(Userid);
 
   const { date } = req.query;
-  console.log(date);
+  // console.log(date);
   
   const dateObject = moment(date, "YYYY-MM-DD").toDate();
 
-  console.log(date);
-  console.log(dateObject);
+  // console.log(date);
+  // console.log(dateObject);
   
   
 
