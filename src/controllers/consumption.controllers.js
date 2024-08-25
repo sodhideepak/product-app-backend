@@ -221,7 +221,7 @@ const consumed_products = asynchandler(async (req, res) => {
     
     { 
       $lookup: {
-        from: 'producttts', // Name of the products collection
+        from: 'final_products', // Name of the products collection
         localField: 'product_id',
         foreignField: '_id', // Adjust the field name if necessary
         as: 'consumed_products'
@@ -334,10 +334,18 @@ let totalNutritionalValue = {
   // Add more nutritional fields as needed
 };
 
+// console.log(consumedproductdata);
+// console.log(consumedproductdata[0].consumed_products[0]);
+
 
 consumedproductdata.forEach(product => {
 
+  // console.log(product);
+  // console.log(product.consumed_products[0]);
+  
   const consumedProduct = product.consumed_products[0]; // Access the first element
+  // console.log(consumedProduct);
+  
   const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
   // Calculate adjusted nutritional values based on the serving size
@@ -356,7 +364,9 @@ consumedproductdata.forEach(product => {
 });
 
 
- 
+
+
+
 
   const initializeWeekData = (condition) => {
     const daysOfWeek = [];
