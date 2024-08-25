@@ -135,7 +135,7 @@ console.log(_id);
         
         { 
             $lookup: {
-                from: 'producttts', // Name of the ratings collection
+                from: 'final_products', // Name of the ratings collection
                 localField: 'product_id',
                 foreignField: '_id', // Adjust the field name if necessary
                 as: 'liked_product',

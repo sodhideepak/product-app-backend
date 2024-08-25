@@ -567,7 +567,7 @@ const consumed_products_day = asynchandler(async (req, res) => {
       
   //     { 
   //         $lookup: {
-  //             from: 'producttts', // Name of the ratings collection
+  //             from: 'final_products', // Name of the ratings collection
   //             localField: 'product_id',
   //             foreignField: '_id', // Adjust the field name if necessary
   //             as: 'consumed_products',
@@ -615,7 +615,7 @@ const consumed_products_day = asynchandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: 'producttts',
+        from: 'final_products',
         localField: 'product_id',
         foreignField: '_id',
         as: 'consumed_products'
@@ -672,7 +672,7 @@ const getMonthlyReport = async (req, res) => {
       
       { 
         $lookup: {
-          from: 'producttts', // Name of the products collection
+          from: 'final_products', // Name of the products collection
           localField: 'product_id',
           foreignField: '_id', // Adjust the field name if necessary
           as: 'consumed_products'
