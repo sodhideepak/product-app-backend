@@ -507,14 +507,64 @@ const weekDatacondition = getWeekDataconditions(condition);
 
 
 
+
+function getWeekRange(weekLabel = 'thisweek') {
+  const now = new Date();
+  
+  let weekOffset;
+  switch (weekLabel.toLowerCase()) {
+      case 'lastweek':
+          weekOffset = -1;
+          break;
+      case 'thirdlastweek':
+          weekOffset = -2;
+          break;
+      case 'fourthlastweek':
+          weekOffset = -3;
+          break;
+      default:
+          weekOffset = 0;
+          break;
+  }
+
+  const currentDayOfWeek = now.getDay();
+    
+    // Calculate the start of the week (Sunday)
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - currentDayOfWeek + (weekOffset * 7));
+    
+    // Calculate the end of the week (Saturday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    
+    // Format the start and end dates as day and month
+    const options = { day: 'numeric', month: 'long' };
+    const startDate = startOfWeek.toLocaleDateString('en-GB', options).split(' ');
+    const endDate = endOfWeek.toLocaleDateString('en-GB', options).split(' ');
+
+    // If the month is the same for both start and end dates
+    if (startDate[1] === endDate[1]) {
+        return `${startDate[0]}-${endDate[0]} ${startDate[1]}`;
+    } else {
+        return `${startDate[0]} ${startDate[1]} - ${endDate[0]} ${endDate[1]}`;
+    }
+}
+
+const date_range= getWeekRange(condition)
+
+
+
+
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
           weekData,
-          totalNutritionalValue,totalproductconsumed,
-          weekDatacondition
+          totalNutritionalValue,
+          totalproductconsumed,
+          weekDatacondition,
+          date_range
         },
         "products fetched sucessfully"
       )
