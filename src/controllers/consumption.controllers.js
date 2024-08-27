@@ -750,18 +750,111 @@ const consumed_products_day = asynchandler(async (req, res) => {
           product_name: 1,
           brand_name: 1,
           product_category: 1,
-          product_front_image: 1
+          product_front_image: 1,
+          nutritional_value:1
         }
       }
-    }
+    },
+   
   ]);
+
+
+
+
+
+  
+let totalNutritionalValue = {
+  energy: 0,
+  protein: 0,
+  total_carbohydrates: 0,
+  dietry_fibre: 0,
+  total_sugar:0,
+  total_fats: 0,
+  saturates_fats:0,
+  trans_fats:0,
+  unsaturated_fats:0,
+  sodium: 0,
+  cholestrol: 0,
+  vitamin_A: 0,
+  vitamin_B: 0,
+  vitamin_C: 0,
+  vitamin_D: 0,
+  vitamin_E: 0,
+  calcium: 0,
+  potassium: 0,
+  iron: 0,
+  zinc: 0,
+  phosphorous: 0,
+  magnessium: 0
+
+  // Add more nutritional fields as needed
+};
+
+// console.log(consumedproductdata);
+// console.log(consumedproductdata[0].consumed_products[0]);
+
+
+products_data.forEach(product => {
+
+  // console.log(product);
+  // console.log(product.consumed_products[0]);
+  
+  const consumedProduct = product.consumed_products[0]; // Access the first element
+  // console.log(consumedProduct);
+  
+  const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
+
+  // Calculate adjusted nutritional values based on the serving size
+  const nutritionalValue = consumedProduct.nutritional_value;
+  const factor = servingSize / 100; // Factor to adjust nutritional values
+
+  // Accumulate total nutritional values
+  totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+  totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+  totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+  totalNutritionalValue.dietry_fibre += (nutritionalValue.carbohydrates.dietry_fibre || 0) * factor;
+  totalNutritionalValue.total_sugar += (nutritionalValue.carbohydrates.total_sugar || 0) * factor;
+  totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+  totalNutritionalValue.saturates_fats += (nutritionalValue.fats.saturates_fats || 0) * factor;
+  totalNutritionalValue.trans_fats += (nutritionalValue.fats.trans_fats || 0) * factor;
+  totalNutritionalValue.unsaturated_fats += (nutritionalValue.fats.unsaturated_fats || 0) * factor;
+  totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+  totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+  totalNutritionalValue.vitamin_A += (nutritionalValue.micro_nutrients.vitamin_A || 0) * factor;
+  totalNutritionalValue.vitamin_B += (nutritionalValue.micro_nutrients.vitamin_B || 0) * factor;
+  totalNutritionalValue.vitamin_C += (nutritionalValue.micro_nutrients.vitamin_C || 0) * factor;
+  totalNutritionalValue.vitamin_D += (nutritionalValue.micro_nutrients.vitamin_D || 0) * factor;
+  totalNutritionalValue.vitamin_E += (nutritionalValue.micro_nutrients.vitamin_E || 0) * factor;
+  totalNutritionalValue.calcium += (nutritionalValue.micro_nutrients.calcium || 0) * factor;
+  totalNutritionalValue.potassium += (nutritionalValue.micro_nutrients.potassium || 0) * factor;
+  totalNutritionalValue.iron += (nutritionalValue.micro_nutrients.iron || 0) * factor;
+  totalNutritionalValue.zinc += (nutritionalValue.micro_nutrients.zinc || 0) * factor;
+  totalNutritionalValue.phosphorous += (nutritionalValue.micro_nutrients.phosphorous || 0) * factor;
+  totalNutritionalValue.magnessium += (nutritionalValue.micro_nutrients.magnessium || 0) * factor;
+  // Continue adding and adjusting other nutritional fields as needed
+  
+});
+
+
+
+const sanitized_data = products_data.map(product => {
+  product.consumed_products.forEach(consumed_product => {
+      delete consumed_product.nutritional_value;
+  });
+  return product;
+});
+
+
   
   
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          products_data
+          // products_data,
+          sanitized_data,
+          totalNutritionalValue
+          
         },
         "products fetched sucessfully"
       )

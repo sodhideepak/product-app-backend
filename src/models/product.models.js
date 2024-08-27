@@ -34,6 +34,10 @@ const productschema= new Schema(
         type:String,
         required:true
     },
+    product_sub_category:{
+        type:String,
+        required:true
+    },
     product_front_image:{
         type:String,
         // required:true
