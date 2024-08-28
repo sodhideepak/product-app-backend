@@ -467,63 +467,63 @@ consumedproductdata.forEach(product => {
     const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
     // Initialize total nutritional values object if it doesn't exist
-    if (!weekData[dayIndex].totalNutritionalValue) {
-      weekData[dayIndex].totalNutritionalValue = {
-        energy: 0,
-        protein: 0,
-        total_carbohydrates: 0,
-        dietry_fibre: 0,
-        total_sugar:0,
-        total_fats: 0,
-        saturates_fats:0,
-        trans_fats:0,
-        unsaturated_fats:0,
-        sodium: 0,
-        cholestrol: 0,
-        vitamin_A: 0,
-        vitamin_B: 0,
-        vitamin_C: 0,
-        vitamin_D: 0,
-        vitamin_E: 0,
-        calcium: 0,
-        potassium: 0,
-        iron: 0,
-        zinc: 0,
-        phosphorous: 0,
-        magnessium: 0
-        // Add more nutritional fields as needed
-      };
-    }
+    // if (!weekData[dayIndex].totalNutritionalValue) {
+    //   weekData[dayIndex].totalNutritionalValue = {
+    //     energy: 0,
+    //     protein: 0,
+    //     total_carbohydrates: 0,
+    //     dietry_fibre: 0,
+    //     total_sugar:0,
+    //     total_fats: 0,
+    //     saturates_fats:0,
+    //     trans_fats:0,
+    //     unsaturated_fats:0,
+    //     sodium: 0,
+    //     cholestrol: 0,
+    //     vitamin_A: 0,
+    //     vitamin_B: 0,
+    //     vitamin_C: 0,
+    //     vitamin_D: 0,
+    //     vitamin_E: 0,
+    //     calcium: 0,
+    //     potassium: 0,
+    //     iron: 0,
+    //     zinc: 0,
+    //     phosphorous: 0,
+    //     magnessium: 0
+    //     // Add more nutritional fields as needed
+    //   };
+    // }
 
-    // Calculate adjusted nutritional values based on the serving size
-    const nutritionalValue = consumedProduct.nutritional_value;
-    const factor = servingSize / 100; // Factor to adjust nutritional values
+    // // Calculate adjusted nutritional values based on the serving size
+    // const nutritionalValue = consumedProduct.nutritional_value;
+    // const factor = servingSize / 100; // Factor to adjust nutritional values
 
     
 
 
-    weekData[dayIndex].totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.dietry_fibre += (nutritionalValue.carbohydrates.dietry_fibre || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.total_sugar += (nutritionalValue.carbohydrates.total_sugar || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.saturates_fats += (nutritionalValue.fats.saturates_fats || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.trans_fats += (nutritionalValue.fats.trans_fats || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.unsaturated_fats += (nutritionalValue.fats.unsaturated_fats || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.vitamin_A += (nutritionalValue.micro_nutrients.vitamin_A || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.vitamin_B += (nutritionalValue.micro_nutrients.vitamin_B || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.vitamin_C += (nutritionalValue.micro_nutrients.vitamin_C || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.vitamin_D += (nutritionalValue.micro_nutrients.vitamin_D || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.vitamin_E += (nutritionalValue.micro_nutrients.vitamin_E || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.calcium += (nutritionalValue.micro_nutrients.calcium || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.potassium += (nutritionalValue.micro_nutrients.potassium || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.iron += (nutritionalValue.micro_nutrients.iron || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.zinc += (nutritionalValue.micro_nutrients.zinc || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.phosphorous += (nutritionalValue.micro_nutrients.phosphorous || 0) * factor;
-    weekData[dayIndex].totalNutritionalValue.magnessium += (nutritionalValue.micro_nutrients.magnessium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.dietry_fibre += (nutritionalValue.carbohydrates.dietry_fibre || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.total_sugar += (nutritionalValue.carbohydrates.total_sugar || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.saturates_fats += (nutritionalValue.fats.saturates_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.trans_fats += (nutritionalValue.fats.trans_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.unsaturated_fats += (nutritionalValue.fats.unsaturated_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_A += (nutritionalValue.micro_nutrients.vitamin_A || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_B += (nutritionalValue.micro_nutrients.vitamin_B || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_C += (nutritionalValue.micro_nutrients.vitamin_C || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_D += (nutritionalValue.micro_nutrients.vitamin_D || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_E += (nutritionalValue.micro_nutrients.vitamin_E || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.calcium += (nutritionalValue.micro_nutrients.calcium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.potassium += (nutritionalValue.micro_nutrients.potassium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.iron += (nutritionalValue.micro_nutrients.iron || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.zinc += (nutritionalValue.micro_nutrients.zinc || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.phosphorous += (nutritionalValue.micro_nutrients.phosphorous || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.magnessium += (nutritionalValue.micro_nutrients.magnessium || 0) * factor;
     // Continue adding and adjusting other nutritional fields as needed
 
     // Add product details to the week's data
