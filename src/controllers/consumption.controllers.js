@@ -834,7 +834,7 @@ products_data.forEach(product => {
   // Continue adding and adjusting other nutritional fields as needed
   
 });
-
+  
 
 
 const sanitized_data = products_data.map(product => {
