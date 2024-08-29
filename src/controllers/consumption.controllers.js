@@ -927,16 +927,33 @@ const getMonthlyReport = async (req, res) => {
   }
 
 
+  
   let totalNutritionalValue = {
     energy: 0,
     protein: 0,
     total_carbohydrates: 0,
+    dietry_fibre: 0,
+    total_sugar:0,
     total_fats: 0,
+    saturates_fats:0,
+    trans_fats:0,
+    unsaturated_fats:0,
     sodium: 0,
-    cholestrol: 0
+    cholestrol: 0,
+    vitamin_A: 0,
+    vitamin_B: 0,
+    vitamin_C: 0,
+    vitamin_D: 0,
+    vitamin_E: 0,
+    calcium: 0,
+    potassium: 0,
+    iron: 0,
+    zinc: 0,
+    phosphorous: 0,
+    magnessium: 0
+  
     // Add more nutritional fields as needed
   };
-
   consumedproductdata.forEach(product => {
 
     const consumedProduct = product.consumed_products[0]; // Access the first element
@@ -950,9 +967,26 @@ const getMonthlyReport = async (req, res) => {
     totalNutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
     totalNutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
     totalNutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+    totalNutritionalValue.dietry_fibre += (nutritionalValue.carbohydrates.dietry_fibre || 0) * factor;
+    totalNutritionalValue.total_sugar += (nutritionalValue.carbohydrates.total_sugar || 0) * factor;
     totalNutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+    totalNutritionalValue.saturates_fats += (nutritionalValue.fats.saturates_fats || 0) * factor;
+    totalNutritionalValue.trans_fats += (nutritionalValue.fats.trans_fats || 0) * factor;
+    totalNutritionalValue.unsaturated_fats += (nutritionalValue.fats.unsaturated_fats || 0) * factor;
     totalNutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
     totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+    totalNutritionalValue.vitamin_A += (nutritionalValue.micro_nutrients.vitamin_A || 0) * factor;
+    totalNutritionalValue.vitamin_B += (nutritionalValue.micro_nutrients.vitamin_B || 0) * factor;
+    totalNutritionalValue.vitamin_C += (nutritionalValue.micro_nutrients.vitamin_C || 0) * factor;
+    totalNutritionalValue.vitamin_D += (nutritionalValue.micro_nutrients.vitamin_D || 0) * factor;
+    totalNutritionalValue.vitamin_E += (nutritionalValue.micro_nutrients.vitamin_E || 0) * factor;
+    totalNutritionalValue.calcium += (nutritionalValue.micro_nutrients.calcium || 0) * factor;
+    totalNutritionalValue.potassium += (nutritionalValue.micro_nutrients.potassium || 0) * factor;
+    totalNutritionalValue.iron += (nutritionalValue.micro_nutrients.iron || 0) * factor;
+    totalNutritionalValue.zinc += (nutritionalValue.micro_nutrients.zinc || 0) * factor;
+    totalNutritionalValue.phosphorous += (nutritionalValue.micro_nutrients.phosphorous || 0) * factor;
+    totalNutritionalValue.magnessium += (nutritionalValue.micro_nutrients.magnessium || 0) * factor;
+  
     // Continue adding and adjusting other nutritional fields as needed
    
   });
