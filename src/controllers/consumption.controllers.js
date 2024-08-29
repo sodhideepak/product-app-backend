@@ -410,7 +410,7 @@ consumedproductdata.forEach(product => {
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
             date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
-            consumed_products: []
+            products: []
           });
         }
         break;
@@ -418,7 +418,7 @@ consumedproductdata.forEach(product => {
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
             date: moment().subtract(1, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
-            consumed_products: []
+            products: []
           });
         }
         break;
@@ -426,7 +426,7 @@ consumedproductdata.forEach(product => {
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
             date: moment().subtract(2, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
-            consumed_products: []
+            products: []
           });
         }
         break;
@@ -434,7 +434,7 @@ consumedproductdata.forEach(product => {
           for (let i = 0; i < 7; i++) {
             daysOfWeek.push({
               date: moment().subtract(3, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
-              consumed_products: []
+              products: []
             });
           }
           break;
@@ -442,7 +442,7 @@ consumedproductdata.forEach(product => {
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
             date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
-            consumed_products: []
+            products: []
           });
         }
         break;
@@ -467,13 +467,13 @@ consumedproductdata.forEach(product => {
     const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
 
-    weekData[dayIndex].consumed_products.push({
+    weekData[dayIndex].products.push({
       _id: product._id,
       consumed_By:product.consumed_By,
       consumed_At_date:product.consumed_At_date,
       consumed_At_time:product.consumed_At_time,
       serving_size: servingSize,
-      consumed_product: {
+      consumed_products: {
         product_barcode: consumedProduct.product_barcode,
         product_name: consumedProduct.product_name,
       },
