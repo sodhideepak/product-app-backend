@@ -1003,7 +1003,7 @@ const getMonthlyReport = async (req, res) => {
     // Calculate the month offset based on the input
     let monthOffset;
     switch (input) {
-        case 'thismonth':
+        case 'currentmonth':
             monthOffset = 0;
             break;
         case 'lastmonth':
