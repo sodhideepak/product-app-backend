@@ -476,6 +476,9 @@ consumedproductdata.forEach(product => {
       consumed_products: {
         product_barcode: consumedProduct.product_barcode,
         product_name: consumedProduct.product_name,
+        brand_name: consumedProduct.brand_name,
+        product_category:consumedProduct.product_category,
+        product_front_image: consumedProduct.product_front_image
       },
     });
   }
@@ -683,23 +686,37 @@ const consumed_products_day = asynchandler(async (req, res) => {
       }
     },
     {
+      $unwind: "$consumed_products"
+    },
+    {
       $project: {
         consumed_By: 1,
         consumed_At_date: 1,
         consumed_At_time: 1,
         serving_size:1,
-        consumed_products: {
-          product_barcode: 1,
-          product_name: 1,
-          brand_name: 1,
-          product_category: 1,
-          product_front_image: 1,
-          nutritional_value:1
-        }
+        "consumed_products.product_barcode": 1,
+        "consumed_products.product_name": 1,
+        "consumed_products.brand_name": 1,
+        "consumed_products.product_category": 1,
+        "consumed_products.product_front_image": 1,
+        "consumed_products.nutritional_value":1,
+        // consumed_products: {
+        //   product_barcode: 1,
+        //   product_name: 1,
+        //   brand_name: 1,
+        //   product_category: 1,
+        //   product_front_image: 1,
+        //   nutritional_value:1
+        // }
       }
     },
    
   ]);
+
+
+
+  // console.log("hellllooo",products_data);
+  
 
 
 
@@ -742,13 +759,15 @@ products_data.forEach(product => {
   // console.log(product);
   // console.log(product.consumed_products[0]);
   
-  const consumedProduct = product.consumed_products[0]; // Access the first element
+  const consumedProduct = product.consumed_products; // Access the first element
   // console.log(consumedProduct);
   
   const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
   // Calculate adjusted nutritional values based on the serving size
   const nutritionalValue = consumedProduct.nutritional_value;
+  console.log(nutritionalValue);
+  
   const factor = servingSize / 100; // Factor to adjust nutritional values
 
   // Accumulate total nutritional values
@@ -781,9 +800,9 @@ products_data.forEach(product => {
 
 
 const sanitized_data = products_data.map(product => {
-  product.consumed_products.forEach(consumed_product => {
-      delete consumed_product.nutritional_value;
-  });
+  
+      delete product.consumed_products.nutritional_value;
+ 
   return product;
 });
 
