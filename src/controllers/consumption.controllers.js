@@ -485,17 +485,20 @@ consumedproductdata.forEach(product => {
 });
 
 
-function getWeekDataconditions(currentWeek) {
+function getWeekDataconditions(condition) {
   // Define the list of weeks in order
   const weeks = ["fourthlastweek", "thirdlastweek", "lastweek", "currentweek"];
 
   // Ensure the current week is in the list
-  if (!weeks.includes(currentWeek)) {
+  if (!weeks.includes(condition)) {
       return { error: "Invalid week name" };
   }
 
   // Find the index of the current week
-  const currentIndex = weeks.indexOf(currentWeek);
+  const currentIndex = weeks.indexOf(condition);
+  console.log(currentIndex);
+  
+  const currentWeek = weeks[currentIndex]
 
   // Determine if there are previous and next weeks
   const hasPreviousWeek = currentIndex > 0;
@@ -563,6 +566,8 @@ function getWeekRange(weekLabel = 'thisweek') {
         return `${startDate[0]} ${startDate[1]} - ${endDate[0]} ${endDate[1]}`;
     }
 }
+
+
 
 const date_range= getWeekRange(condition)
 
@@ -904,7 +909,7 @@ const getMonthlyReport = async (req, res) => {
   let consumedproductdata;
   let totalproductconsumed;
   switch (condition) {
-    case 'month':
+    case 'thismonth':
       consumedproductdata = products_data.filter(item => item.isThisMonth);
       totalproductconsumed = consumedproductdata.length;
       break;
@@ -994,14 +999,101 @@ const getMonthlyReport = async (req, res) => {
   // console.log(products_data);
   
 
+  function getMonthRange(input) {
+    // Calculate the month offset based on the input
+    let monthOffset;
+    switch (input) {
+        case 'thismonth':
+            monthOffset = 0;
+            break;
+        case 'lastmonth':
+            monthOffset = -1;
+            break;
+        case 'thirdlastmonth':
+            monthOffset = -2;
+            break;
+        case 'fourthlastmonth':
+            monthOffset = -3;
+            break;
+       
+    }
 
+    // Get the current date
+    const today = new Date();
+
+    // Calculate the target month and year
+    const targetDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+
+    // Get the first and last day of the target month
+    const firstDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+    const lastDay = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+
+    const firstDayString = firstDay.getDate().toString().padStart(2, '0');
+    const lastDayString = lastDay.getDate().toString().padStart(2, '0');
+    const monthString = firstDay.toLocaleString('default', { month: 'long' });
+
+    // Return an object with additional data
+    return `${firstDayString}-${lastDayString} ${monthString}`
+    // return {
+    //     range: `${firstDayString}-${lastDayString} ${monthString}`,
+    //     // monthName: monthString,
+    // };
+}
+
+
+
+
+function getMonthDataConditions(condition) {
+  // Define the list of months in order
+  const months = ["fourthlastmonth", "thirdlastmonth", "lastmonth", "currentmonth"];
+
+  // Ensure the current month is in the list
+  if (!months.includes(condition.toLowerCase())) {
+      return { error: "Invalid month name" };
+  }
+
+  // Find the index of the current month
+  const currentIndex = months.indexOf(condition.toLowerCase());
+  
+  const currentMonth = months[currentIndex];
+
+  // Determine if there are previous and next months
+  const hasPreviousMonth = currentIndex > 0;
+  const hasNextMonth = currentIndex < months.length - 1;
+
+  // Get the previous and next month names if they exist
+  const previousMonth = hasPreviousMonth ? months[currentIndex - 1] : null;
+  const nextMonth = hasNextMonth ? months[currentIndex + 1] : null;
+
+  // Return the result as an object
+  return {
+      hasNextMonth: hasNextMonth,
+      hasPreviousMonth: hasPreviousMonth,
+      currentMonth: currentMonth,
+      nextMonth: nextMonth || "None",
+      previousMonth: previousMonth || "None"
+  };
+}
+
+// Example usage
+
+
+
+
+
+
+const month_condition=getMonthDataConditions(condition)
+const month_range=getMonthRange(condition)
 
 
     return res.status(200).json(
       new ApiResponse(
         200,
         {
-          totalproductconsumed,totalNutritionalValue
+          totalproductconsumed,
+          totalNutritionalValue,
+          month_range,
+          month_condition
         },
         "products fetched sucessfully"
       )
