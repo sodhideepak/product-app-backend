@@ -466,6 +466,66 @@ consumedproductdata.forEach(product => {
     const consumedProduct = product.consumed_products[0]; // Access the first element
     const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
+ if (!weekData[dayIndex].per_day_NutritionalValue) {
+      weekData[dayIndex].per_day_NutritionalValue = {
+        energy: 0,
+        protein: 0,
+        dietry_fibre: 0,
+        total_carbohydrates: 0,
+        total_sugar:0,
+        total_fats: 0,
+        sodium: 0,
+        // saturates_fats:0,
+        // trans_fats:0,
+        // unsaturated_fats:0,
+        // cholestrol: 0,
+        // vitamin_A: 0,
+        // vitamin_B: 0,
+        // vitamin_C: 0,
+        // vitamin_D: 0,
+        // vitamin_E: 0,
+        // calcium: 0,
+        // potassium: 0,
+        // iron: 0,
+        // zinc: 0,
+        // phosphorous: 0,
+        // magnessium: 0
+        // Add more nutritional fields as needed
+      };
+    }
+
+    // Calculate adjusted nutritional values based on the serving size
+    const nutritionalValue = consumedProduct.nutritional_value;
+    const factor = servingSize / 100; // Factor to adjust nutritional values
+
+    
+
+
+    weekData[dayIndex].per_day_NutritionalValue.energy += (nutritionalValue.energy || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.protein += (nutritionalValue.protein || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.total_carbohydrates += (nutritionalValue.total_carbohydrates || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.dietry_fibre += (nutritionalValue.carbohydrates.dietry_fibre || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.total_sugar += (nutritionalValue.carbohydrates.total_sugar || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.total_fats += (nutritionalValue.total_fats || 0) * factor;
+    weekData[dayIndex].per_day_NutritionalValue.sodium += (nutritionalValue.sodium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.saturates_fats += (nutritionalValue.fats.saturates_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.trans_fats += (nutritionalValue.fats.trans_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.unsaturated_fats += (nutritionalValue.fats.unsaturated_fats || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.cholestrol += (nutritionalValue.cholestrol || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_A += (nutritionalValue.micro_nutrients.vitamin_A || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_B += (nutritionalValue.micro_nutrients.vitamin_B || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_C += (nutritionalValue.micro_nutrients.vitamin_C || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_D += (nutritionalValue.micro_nutrients.vitamin_D || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.vitamin_E += (nutritionalValue.micro_nutrients.vitamin_E || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.calcium += (nutritionalValue.micro_nutrients.calcium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.potassium += (nutritionalValue.micro_nutrients.potassium || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.iron += (nutritionalValue.micro_nutrients.iron || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.zinc += (nutritionalValue.micro_nutrients.zinc || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.phosphorous += (nutritionalValue.micro_nutrients.phosphorous || 0) * factor;
+    // weekData[dayIndex].totalNutritionalValue.magnessium += (nutritionalValue.micro_nutrients.magnessium || 0) * factor;
+    // Continue adding and adjusting other nutritional fields as needed
+
+
 
     weekData[dayIndex].products.push({
       _id: product._id,
@@ -481,6 +541,9 @@ consumedproductdata.forEach(product => {
         product_front_image: consumedProduct.product_front_image
       },
     });
+
+
+
   }
 });
 
