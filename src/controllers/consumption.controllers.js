@@ -467,7 +467,7 @@ consumedproductdata.forEach(product => {
     const servingSize = product.serving_size || 100; // Default to 100 if serving size is not available
 
  if (!weekData[dayIndex].per_day_NutritionalValue) {
-      per_day_NutritionalValue = {
+      weekData[dayIndex].per_day_NutritionalValue = {
         energy: 0,
         protein: 0,
         dietry_fibre: 0,
