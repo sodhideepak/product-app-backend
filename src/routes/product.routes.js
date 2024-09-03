@@ -12,12 +12,14 @@ import {
     categories,
     alternateproducts,
     registeringredient,
+    updateproduct,
     searchingredient,
     product_ranking,
     update_ingredient,
     checkbarcode,
     displayemptyingredient,
-    products_count
+    products_count,
+    deleteingredient
     
   
      } from "../controllers/product.controller.js";
@@ -71,6 +73,13 @@ router.route("/searchproduct").get(getLoggedInUserOrIgnore,searchproduct)
 
 
 router.route("/searchingredient").get(searchingredient)
+
+
+router.route("/updateproduct").get(updateproduct)
+
+
+router.route("/deleteingredient").get(deleteingredient)
+
 
 
 

@@ -564,7 +564,7 @@ const registerproduct = asynchandler(async (req,res)=>{
     //         dietry_fiber
     //       )
 
-
+    const updatedingredients=ingredients.map(keyword => keyword.trim().toLowerCase());
 
     const Product=await product.create({
         product_barcode:product_barcode.trim(),
@@ -574,7 +574,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         product_keywords:product_keywords || [],
         brand_name:brand_name.trim(),
         price:price,
-        ingredients,
+        ingredients:updatedingredients,
         nutritional_value,
         measuring_unit,
         fruitsVegetablesPercentage:fruitsVegetablesPercentage||0,
@@ -649,6 +649,43 @@ const registerproduct = asynchandler(async (req,res)=>{
 
 
 
+
+
+const updateproduct = asynchandler(async (req,res)=>{
+   
+
+
+    const products = await product.find({});
+
+        // Iterate over each product and update the ingredients
+    for (let product of products) {
+        const updatedIngredients = [...new Set(
+            product.ingredients.map(ingredient => ingredient.trim().toLowerCase())
+        )];
+    // Assign the unique ingredients back to the product
+        product.ingredients = updatedIngredients;
+ 
+        // console.log(updatedIngredients);
+        
+            // Save the updated product back to the database
+            await product.save();
+    }
+
+
+
+
+
+    return res.status(201).json(
+        new ApiResponse(200,{},"product updated sucessfully")
+        // new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+    )
+
+})
+
+
+
+
+
 const checkbarcode = asynchandler(async (req,res)=>{
 
     // console.log(req.params)
@@ -690,7 +727,7 @@ const checkbarcode = asynchandler(async (req,res)=>{
 
 const showproduct = asynchandler(async (req,res)=>{
 
-    console.log(req.params)
+    // console.log(req.params)
     const {product_barcode}= req.params
 
     if (!product_barcode) {
@@ -701,6 +738,7 @@ const showproduct = asynchandler(async (req,res)=>{
         $or:[ {product_barcode}]
     })
 
+    // console.log(fetched_product.ingredients);
     
     // console.log(fetched_product)
     if (!fetched_product) {
@@ -736,65 +774,6 @@ const showproduct = asynchandler(async (req,res)=>{
           
             }
         },
-        // {
-        //     $addFields: {
-        //         'product.ingredients': {
-        //             $map: {
-        //                 input: "$ingredients",
-        //                 as: "ingredient",
-        //                 in: {
-        //                     $mergeObjects: [
-        //                         { name: "$$ingredient" },
-        //                         {
-        //                             $arrayElemAt: [
-        //                                 {
-        //                                     $filter: {
-        //                                         input: "$ingredientDetails",
-        //                                         as: "detail",
-        //                                         cond: { $eq: ["$$detail.name", "$$ingredient"] }
-        //                                     }
-        //                                 },
-        //                                 0
-        //                             ]
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },  
-        // {
-        //     $addFields: {
-        //         'product.ingredients': {
-        //             $map: {
-        //                 input: "$ingredients",
-        //                 as: "ingredient",
-        //                 in: {
-        //                     $mergeObjects: [
-        //                         { name: "$$ingredient" },
-        //                         {
-        //                             $arrayElemAt: [
-        //                                 {
-        //                                     $filter: {
-        //                                         input: "$ingredientDetails",
-        //                                         as: "detail",
-        //                                         cond: {
-        //                                             $in: ["$$ingredient", "$$detail.keywords"]
-        //                                         }
-        //                                     }
-        //                                 },
-        //                                 0
-        //                             ]
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
-
-
-
         {
             $addFields: {
                 'product.ingredients': {
@@ -836,6 +815,94 @@ const showproduct = asynchandler(async (req,res)=>{
                 }
             }
         },
+        // {
+        //     $addFields: {
+        //         'product.ingredients': {
+        //             $map: {
+        //                 input: "$ingredients",
+        //                 as: "ingredient",
+        //                 in: {
+        //                     $mergeObjects: [
+        //                         { name: "$$ingredient" },
+        //                         {
+        //                             $arrayElemAt: [
+        //                                 {
+        //                                     $filter: {
+        //                                         input: "$ingredientDetails",
+        //                                         as: "detail",
+        //                                         cond: {
+        //                                             $in: ["$$ingredient", "$$detail.keywords"]
+        //                                         }
+        //                                     }
+        //                                 },
+        //                                 0
+        //                             ]
+        //                         }
+        //                     ]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
+
+
+
+        // {
+        //     $addFields: {
+        //         'product.ingredients': {
+        //             $map: {
+        //                 input: "$ingredients",
+        //                 as: "ingredient",
+        //                 in: {
+        //                     $mergeObjects: [
+        //                         { name: "$$ingredient" },
+        //                         {
+        //                             $let: {
+        //                                 vars: {
+        //                                     matchingDetail: {
+        //                                         $arrayElemAt: [
+        //                                             {
+        //                                                 $filter: {
+        //                                                     input: "$ingredientDetails",
+        //                                                     as: "detail",
+        //                                                     cond: {
+        //                                                         $in: [
+        //                                                             true,
+        //                                                             {
+        //                                                                 $map: {
+        //                                                                     input: "$$detail.keywords",
+        //                                                                     as: "keyword",
+        //                                                                     in: {
+        //                                                                         $regexMatch: {
+        //                                                                             input: { $toLower: "$$ingredient" },
+        //                                                                             regex: { $toLower: "$$keyword" },
+        //                                                                             options: "i"
+        //                                                                         }
+        //                                                                     }
+        //                                                                 }
+        //                                                             }
+        //                                                         ]
+        //                                                     }
+        //                                                 }
+        //                                             },
+        //                                             0
+        //                                         ]
+        //                                     }
+        //                                 },
+        //                                 in: {
+        //                                     $mergeObjects: [
+        //                                         "$$matchingDetail",
+        //                                         { name: "$$ingredient" }
+        //                                     ]
+        //                                 }
+        //                             }
+        //                         }
+        //                     ]
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
         
         {
             $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
@@ -1889,7 +1956,7 @@ const registeringredient = asynchandler(async (req,res)=>{
 
 
 
-    const {
+    var {
         name,
         keywords,
         purpose,
@@ -1898,23 +1965,28 @@ const registeringredient = asynchandler(async (req,res)=>{
     }= req.body
     
 
+    const ingredientname=name.trim().toLowerCase();
+    keywords=keywords.map(keyword => keyword.trim().toLowerCase());
+    ingredients=ingredients.map(ingredient => ingredient.trim().toLowerCase());
 
-    const existedproduct = await ingredient.findOne(
-        {
-            $or:[{name}]
-        }
-    )
+
+    const existedproduct = await ingredient.findOne({
+        $or: [
+            { name: ingredientname }, // Match directly with the name field
+            { keywords: ingredientname } // Check if the inputName exists in the keywords array
+        ]
+    })
 
     if (existedproduct) {
         throw new ApiError(409,"ingredient already registered")
     }
-
+ 
     
 
 
 
     const ingredients_data=await ingredient.create({
-        name,
+        name:ingredientname,
         keywords,
         purpose,
         ingredients,
@@ -1948,7 +2020,7 @@ const update_ingredient = asynchandler(async (req,res)=>{
 
 
 
-    const {
+    var {
         name,
         keywords,
         purpose,
@@ -1956,7 +2028,7 @@ const update_ingredient = asynchandler(async (req,res)=>{
         description
     }= req.body
     
-
+    name=name.trim().toLowerCase();
 
     const ingredient_data = await ingredient.findOne(
         {
@@ -2005,6 +2077,29 @@ const update_ingredient = asynchandler(async (req,res)=>{
 
 
 
+
+const deleteingredient = asynchandler(async (req,res)=>{
+   
+
+
+
+    const {
+        id
+    }= req.body
+    
+
+    const result =await ingredient.findByIdAndDelete( id);    
+
+  
+
+  
+
+    return res.status(201).json(
+        new ApiResponse(200,{},"product deleted sucessfully")
+        // new ApiResponse(200,{createdproduct,rating},"product registered sucessfully")
+    )
+
+})
 
 
 
@@ -2185,6 +2280,7 @@ export {
     registerproduct,
     showproduct,
     updateproductimages,
+    updateproduct,
     searchproduct,
     most_scanned,
     allproducts,
@@ -2197,6 +2293,7 @@ export {
     update_ingredient,
     checkbarcode,
     displayemptyingredient,
+    deleteingredient,
     products_count
   
 }
