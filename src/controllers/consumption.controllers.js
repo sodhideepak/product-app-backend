@@ -404,12 +404,14 @@ consumedproductdata.forEach(product => {
   const initializeWeekData = (condition) => {
     const daysOfWeek = [];
     // console.log(condition);
-  
+   
+    
     switch (condition) {
       case 'currentweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
+            // date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),            
+            date: moment.tz('Asia/Kolkata').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -417,7 +419,7 @@ consumedproductdata.forEach(product => {
       case 'lastweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().subtract(1, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
+            date:moment.tz('Asia/Kolkata').startOf('week').subtract(1, 'week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -425,7 +427,7 @@ consumedproductdata.forEach(product => {
       case 'thirdlastweek':
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().subtract(2, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
+            date: moment.tz('Asia/Kolkata').subtract(2, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
@@ -433,7 +435,7 @@ consumedproductdata.forEach(product => {
         case 'fourthlastweek':
           for (let i = 0; i < 7; i++) {
             daysOfWeek.push({
-              date: moment().subtract(3, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
+              date: moment.tz('Asia/Kolkata').subtract(3, 'weeks').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
               products: []
             });
           }
@@ -441,7 +443,7 @@ consumedproductdata.forEach(product => {
       default:
         for (let i = 0; i < 7; i++) {
           daysOfWeek.push({
-            date: moment().startOf('week').add(i, 'days').format('DD/MM/YYYY'),
+            date: moment.tz('Asia/Kolkata').startOf('week').add(i, 'days').format('DD/MM/YYYY'),
             products: []
           });
         }
