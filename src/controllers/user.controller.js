@@ -159,8 +159,13 @@ const generateAccessAndRefreshTokens=async(userid)=>{
 
 const calculate_age = function calculateAge(dob) {
     const dobDate = new Date(dob);
-    const today = new Date();
+    // const today = new Date();
+    const today = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
+    // console.log(dobDate);
+    console.log(today);
+    
+ 
     let years = today.getFullYear() - dobDate.getFullYear();
     let months = today.getMonth() - dobDate.getMonth();
     let days = today.getDate() - dobDate.getDate();
