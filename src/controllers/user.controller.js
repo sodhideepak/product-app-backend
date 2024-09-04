@@ -160,10 +160,14 @@ const generateAccessAndRefreshTokens=async(userid)=>{
 const calculate_age = function calculateAge(dob) {
     const dobDate = new Date(dob);
     // const today = new Date();
-    const today = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-
-    // console.log(dobDate);
-    console.log(today);
+    // const today = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    const var_today = new Date();
+    const indiaTimeOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+    const utcTime = var_today.getTime() + (var_today.getTimezoneOffset() * 60000); // Convert to UTC
+    const today = new Date(utcTime + indiaTimeOffset);
+    
+    // console.log(today);
+    // console.log(indiaTime);
     
  
     let years = today.getFullYear() - dobDate.getFullYear();
