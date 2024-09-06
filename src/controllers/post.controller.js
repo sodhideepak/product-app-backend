@@ -472,7 +472,7 @@ const allposts = asynchandler(async (req,res)=>{
                 },
                
           }
-      },
+      },    
         {
           $project:{
               likes:0
