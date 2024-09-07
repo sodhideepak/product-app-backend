@@ -281,6 +281,15 @@ function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetables
 
 
 
+function capitalizeFirstLetter(str) {
+    return str
+      .split(' ') // Split the string into an array of words
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+      .join(' '); // Join the words back into a single string
+  }
+  
+
+
 
 function calculate_ml_NutriScore(kcal, sugars, saturatedFat, sodium, fruitsVegetablesPercentage, fiber, protein) {
     // Define thresholds for negative points (A, B, C, D)
@@ -815,95 +824,6 @@ const showproduct = asynchandler(async (req,res)=>{
                 }
             }
         },
-        // {
-        //     $addFields: {
-        //         'product.ingredients': {
-        //             $map: {
-        //                 input: "$ingredients",
-        //                 as: "ingredient",
-        //                 in: {
-        //                     $mergeObjects: [
-        //                         { name: "$$ingredient" },
-        //                         {
-        //                             $arrayElemAt: [
-        //                                 {
-        //                                     $filter: {
-        //                                         input: "$ingredientDetails",
-        //                                         as: "detail",
-        //                                         cond: {
-        //                                             $in: ["$$ingredient", "$$detail.keywords"]
-        //                                         }
-        //                                     }
-        //                                 },
-        //                                 0
-        //                             ]
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
-
-
-
-        // {
-        //     $addFields: {
-        //         'product.ingredients': {
-        //             $map: {
-        //                 input: "$ingredients",
-        //                 as: "ingredient",
-        //                 in: {
-        //                     $mergeObjects: [
-        //                         { name: "$$ingredient" },
-        //                         {
-        //                             $let: {
-        //                                 vars: {
-        //                                     matchingDetail: {
-        //                                         $arrayElemAt: [
-        //                                             {
-        //                                                 $filter: {
-        //                                                     input: "$ingredientDetails",
-        //                                                     as: "detail",
-        //                                                     cond: {
-        //                                                         $in: [
-        //                                                             true,
-        //                                                             {
-        //                                                                 $map: {
-        //                                                                     input: "$$detail.keywords",
-        //                                                                     as: "keyword",
-        //                                                                     in: {
-        //                                                                         $regexMatch: {
-        //                                                                             input: { $toLower: "$$ingredient" },
-        //                                                                             regex: { $toLower: "$$keyword" },
-        //                                                                             options: "i"
-        //                                                                         }
-        //                                                                     }
-        //                                                                 }
-        //                                                             }
-        //                                                         ]
-        //                                                     }
-        //                                                 }
-        //                                             },
-        //                                             0
-        //                                         ]
-        //                                     }
-        //                                 },
-        //                                 in: {
-        //                                     $mergeObjects: [
-        //                                         "$$matchingDetail",
-        //                                         { name: "$$ingredient" }
-        //                                     ]
-        //                                 }
-        //                             }
-        //                         }
-        //                     ]
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
-        
         {
             $replaceRoot: { newRoot: "$product" } // Replace root with the merged product document
         },   
@@ -1577,6 +1497,7 @@ const allproducts = asynchandler(async (req,res)=>{
               brand_name:1,
               rank:1,
               product_category:1,
+              product_sub_category:1,
               product_front_image:1,
               fetchCount:1,
               product_finalscore: "$ratings.product_finalscore",
@@ -1926,6 +1847,54 @@ const update_product_rating = asynchandler(async(req,res)=>{
 })
 
  
+
+
+const update_product_info = asynchandler(async(req,res)=>{
+
+    const {product_barcode,
+           product_category,
+           product_sub_category,}=req.body
+
+
+           const fetched_product= await product.findOne({
+            $or:[ {product_barcode}]
+        })
+    
+
+        fetched_product.product_category=capitalizeFirstLetter(product_category);
+        fetched_product.product_sub_category=capitalizeFirstLetter(product_sub_category);
+  
+
+
+        await fetched_product.save();
+        
+        const updated_product= await product.findOne({
+            $or:[ {product_barcode}]
+        })
+   
+   
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                updated_product
+            //     finalScore,
+            // nutriScore
+            },
+            "ratings updated sucessfully")
+    )
+
+
+
+})
+
+ 
+
+
+
+
 
 const categories = asynchandler(async (req,res)=>{
 
@@ -2294,6 +2263,7 @@ export {
     checkbarcode,
     displayemptyingredient,
     deleteingredient,
-    products_count
+    products_count,
+    update_product_info
   
 }

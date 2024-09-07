@@ -19,7 +19,8 @@ import {
     checkbarcode,
     displayemptyingredient,
     products_count,
-    deleteingredient
+    deleteingredient,
+    update_product_info
     
   
      } from "../controllers/product.controller.js";
@@ -69,6 +70,10 @@ router.route("/categories").get(categories)
 
 router.route("/searchproduct").get(getLoggedInUserOrIgnore,searchproduct)
 
+
+
+
+router.route("/update_product_info").post(update_product_info)
 
 
 
