@@ -591,7 +591,11 @@ const weekDatacondition = getWeekDataconditions(condition);
 
 
 function getWeekRange(weekLabel = 'thisweek') {
-  const now = new Date();
+
+  
+  const curdate=moment.tz('Asia/Kolkata');
+  const now = curdate.toDate();
+  
   
   let weekOffset;
   switch (weekLabel.toLowerCase()) {
