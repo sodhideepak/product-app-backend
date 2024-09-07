@@ -64,7 +64,11 @@ for (let week = 0; week < 4; week++) {
 
 function getCurrentISTDateTime() {
   // Get the current timestamp
-  const timestamp = Date.now();
+  
+  const curdate=moment.tz('Asia/Kolkata');
+  // const now = curdate.toDate();
+  
+  const timestamp = curdate.toDate();
 
   // Create a new Date object from the timestamp
   const date = new Date(timestamp);
@@ -593,8 +597,14 @@ const weekDatacondition = getWeekDataconditions(condition);
 function getWeekRange(weekLabel = 'thisweek') {
 
   
-  const curdate=moment.tz('Asia/Kolkata');
-  const now = curdate.toDate();
+  const utcMoment=moment.tz('Asia/Kolkata');
+  // const utcMoment=moment.tz('Africa/Abidjan');
+  // console.log(curdate);
+  
+  // const now = curdate.clone().utc().toDate();
+  const now = new Date(utcMoment.year(), utcMoment.month(), utcMoment.date(), utcMoment.hour(), utcMoment.minute(), utcMoment.second());;
+  // console.log("hfcgfcc",now);
+  
   
   
   let weekOffset;
@@ -617,6 +627,8 @@ function getWeekRange(weekLabel = 'thisweek') {
     
     // Calculate the start of the week (Sunday)
     const startOfWeek = new Date(now);
+    // console.log(startOfWeek);
+    
     startOfWeek.setDate(now.getDate() - currentDayOfWeek + (weekOffset * 7));
     
     // Calculate the end of the week (Saturday)
