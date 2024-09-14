@@ -1370,14 +1370,15 @@ const most_scanned = asynchandler(async (req,res)=>{
 const product_ranking = asynchandler(async (req,res)=>{
     
     
-    const categories = await product.distinct("product_category");
+    const categories = await product.distinct("product_sub_category");
+console.log(categories);
 
     // console.log(categories);
   // Iterate through each category and rank the top 20 products 
 
 for (const category of categories) {
     const topProducts = await product.aggregate([
-        { $match: { product_category: category}  },
+        { $match: { product_sub_category: category}  },
         {
             $lookup: {
                 from: 'productratings', // Name of the ratings collection
