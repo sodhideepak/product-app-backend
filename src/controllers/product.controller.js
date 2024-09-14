@@ -1371,7 +1371,7 @@ const product_ranking = asynchandler(async (req,res)=>{
     
     
     const categories = await product.distinct("product_sub_category");
-console.log(categories);
+// console.log(categories);
 
     // console.log(categories);
   // Iterate through each category and rank the top 20 products 
