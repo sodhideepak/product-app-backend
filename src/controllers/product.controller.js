@@ -9,7 +9,7 @@ import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 // import { log } from "winston";
 // import { log } from "winston";
-
+    
 
 
 function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber,category_to_check) {
