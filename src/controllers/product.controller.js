@@ -1401,7 +1401,7 @@ for (const category of categories) {
         await product.updateOne({ _id: topProducts[i]._id }, { $set: { rank: topProducts[i].rank } });
       }
       };
- 
+         
     return res
     .status(200)
     .json(
