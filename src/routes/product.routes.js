@@ -10,7 +10,7 @@ import {
     most_scanned,
     allproducts,
     categories,
-    subcategories,
+    sub_categories,
     alternateproducts,
     registeringredient,
     updateproduct,
@@ -66,7 +66,7 @@ router.route("/categories").get(categories)
 
 
 
-router.route("/subcategories").get(subcategories)
+router.route("/subcategories").get(sub_categories)
 
 // router.route("/showproductt/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
 
