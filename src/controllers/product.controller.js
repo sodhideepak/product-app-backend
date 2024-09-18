@@ -1921,6 +1921,29 @@ const categories = asynchandler(async (req,res)=>{
 
 
 
+const sub_categories = asynchandler(async (req,res)=>{
+
+
+      const subcategories = await product.distinct("product_sub_category");
+
+      const subcategories_count = subcategories.length
+  
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                subcategories,subcategories_count
+            },
+            "product fetched sucessfully")
+    )
+
+})
+
+
+
 const registeringredient = asynchandler(async (req,res)=>{
    
 
@@ -2257,6 +2280,7 @@ export {
     update_product_rating,
     alternateproducts,
     categories,
+    sub_categories,
     registeringredient,
     searchingredient,
     product_ranking,
