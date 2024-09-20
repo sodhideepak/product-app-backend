@@ -1920,28 +1920,35 @@ const categories = asynchandler(async (req,res)=>{
 
 
 
+const sub_categories = asynchandler(async (req, res) => {
 
-const sub_categories = asynchandler(async (req,res)=>{
+    // Extract the main category from the request body
+    const { main_category } = req.body;
 
+    // Ensure the main_category is provided
+    if (!main_category) {
+        throw new ApiError(409,"Main category is required") 
+    }
+    // Fetch the distinct subcategories that belong to the provided main category
+    const subcategories = await product.distinct("product_sub_category", {
+        product_category: { $regex: new RegExp(`^${main_category}$`, "i") }
+    });
+    // Count the number of subcategories
+    const subcategories_count = subcategories.length;
 
-      const subcategories = await product.distinct("product_sub_category");
-
-      const subcategories_count = subcategories.length
-  
-    
-    return res
-    .status(200)
-    .json(
+    // Return the response with the subcategories, their count, and the main category
+    return res.status(200).json(
         new ApiResponse(
             200,
             {
-                subcategories,subcategories_count
+                main_category,
+                subcategories,
+                subcategories_count
             },
-            "product fetched sucessfully")
-    )
-
-})
-
+            "Subcategories fetched successfully"
+        )
+    );
+});
 
 
 const registeringredient = asynchandler(async (req,res)=>{
