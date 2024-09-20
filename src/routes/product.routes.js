@@ -66,7 +66,7 @@ router.route("/categories").get(categories)
 
 
 
-router.route("/subcategories").get(sub_categories)
+router.route("/subcategories/:main_category").get(sub_categories)
 
 // router.route("/showproductt/:product_barcode").get(getLoggedInUserOrIgnore,showproduct)
 

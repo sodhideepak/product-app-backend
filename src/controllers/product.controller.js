@@ -1923,7 +1923,7 @@ const categories = asynchandler(async (req,res)=>{
 const sub_categories = asynchandler(async (req, res) => {
 
     // Extract the main category from the request body
-    const { main_category } = req.body;
+    const { main_category } = req.params;
 
     // Ensure the main_category is provided
     if (!main_category) {
