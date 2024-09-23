@@ -11,7 +11,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 // import { log } from "winston";
        
 
-
+    
 function calculateNutriScore(kcal, carbs, fats, protein, sodium,fruitsVegetablesPercentage,fiber,category_to_check) {
     // Convert kcal to kJ (1 kcal = 4.184 kJ)
     let energy = kcal ;
