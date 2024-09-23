@@ -12,6 +12,7 @@ import {
     categories,
     sub_categories,
     alternateproducts,
+    sub_products_list,
     registeringredient,
     updateproduct,
     searchingredient,
@@ -60,6 +61,10 @@ router.route("/allproducts").get(getLoggedInUserOrIgnore,allproducts)
 
 
 router.route("/alternateproducts/:category").get(getLoggedInUserOrIgnore,alternateproducts)
+
+
+router.route("/subalternateproducts/:sub_category").get(getLoggedInUserOrIgnore,sub_products_list)
+
 
 
 router.route("/categories").get(categories)

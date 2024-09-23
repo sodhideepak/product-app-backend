@@ -1895,6 +1895,132 @@ const update_product_info = asynchandler(async(req,res)=>{
 
 
 
+const sub_products_list = asynchandler(async (req,res)=>{
+
+    
+    const {sub_category}= req.params
+    const category=sub_category.replace(/_/g, " ")
+    console.log(category);
+    // console.log(category);
+       const product_data = await product.aggregate([
+        { $match: {product_sub_category:category} },
+         // Match products based on the query parameters
+        {
+            $lookup: {
+                from: 'productratings', // Name of the ratings collection
+                localField: '_id',
+                foreignField: 'product_id', // Adjust the field name if necessary
+                as: 'ratings'
+            }
+        },
+        {
+            $unwind: '$ratings'
+        },
+        {
+            $lookup: {
+              from: "likes",
+              localField: "_id",
+              foreignField: "product_id",
+              as: "likes",
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+            }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "product_id",  // Ensure this field matches the field in likes collection
+                as: "isliked",
+                pipeline: [
+                    {
+                        $match: {
+                            likedBy: new mongoose.Types.ObjectId(req.user?._id),
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                likesCount: { $size: "$likes" },
+                ratings:  "$ratings" ,
+                isliked: {
+                    $cond: {
+                      if: {
+                        $gte: [
+                          {
+                            // if the isLiked key has document in it
+                            $size: "$isliked",
+                          },
+                          1,
+                        ],
+                      }, 
+                      then: true,
+                      else: false,
+                    },
+                  },
+                 
+            }
+        },
+        {
+            $project: {
+              _id: 1,
+              isliked:1,
+              likesCount: { $size: "$likes" }, 
+              product_barcode: 1,
+              product_name:1,
+              brand_name:1,
+              product_category:1,
+              product_sub_category:1,
+              product_front_image:1,
+              rank:1,
+              price:1,
+              ingredients:1,
+              fetchCount:1,
+              product_finalscore: "$ratings.product_finalscore",
+              product_nutriscore: "$ratings.product_nutriscore"
+
+
+
+            }
+          },
+          {
+            $project:{
+                ratings:0
+            }
+          },
+          {
+            $sort: {
+                rank: 1 // Sort by ratings in descending order (highest first)
+            }
+          }
+        
+
+    ])
+   
+  
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            
+            product_data
+            ,
+            "products fetched sucessfully")
+    )
+
+})
+
+
+
 
 
 const categories = asynchandler(async (req,res)=>{
@@ -2284,6 +2410,7 @@ export {
     searchproduct,
     most_scanned,
     allproducts,
+    sub_products_list,
     update_product_rating,
     alternateproducts,
     categories,
