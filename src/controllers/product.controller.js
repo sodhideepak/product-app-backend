@@ -5,6 +5,7 @@ import { user } from "../models/user.models.js";
 import { productrating } from "../models/productrating.models.js";
 import { ingredient } from "../models/ingredient.models.js";
 import mongoose from "mongoose";
+import { getMongoosePaginationOptions } from "../utils/helper.js";
 import { uploadoncloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 // import { log } from "winston";
@@ -1897,12 +1898,12 @@ const update_product_info = asynchandler(async(req,res)=>{
 
 const sub_products_list = asynchandler(async (req,res)=>{
 
-    
+    const { page = 1, limit = 5 } = req.query;
     const {sub_category}= req.params
     const category=sub_category.replace(/_/g, " ")
     console.log(category);
     // console.log(category);
-       const product_data = await product.aggregate([
+       const product_aggregation = product.aggregate([
         { $match: {product_sub_category:category} },
          // Match products based on the query parameters
         {
@@ -2005,6 +2006,17 @@ const sub_products_list = asynchandler(async (req,res)=>{
    
   
 
+    const product_data = await product.aggregatePaginate(
+        product_aggregation,
+        getMongoosePaginationOptions({
+          page,
+          limit,
+          customLabels: {
+            totalDocs: "totalproducts",
+            docs: "products",
+          },
+        })
+      );
 
     return res
     .status(200)
@@ -2013,6 +2025,7 @@ const sub_products_list = asynchandler(async (req,res)=>{
             200,
             
             product_data
+            // product_aggregation
             ,
             "products fetched sucessfully")
     )
