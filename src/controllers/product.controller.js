@@ -1620,6 +1620,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
               product_name:1,
               brand_name:1,
               product_category:1,
+              product_sub_category:1,
               product_front_image:1,
               rank:1,
               price:1,
