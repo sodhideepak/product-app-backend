@@ -1546,7 +1546,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
     const {category}= req.params
     // console.log(category);
        const product_data = await product.aggregate([
-        { $match: {product_sub_category:category} },
+        { $match: {product_category:category} },
          // Match products based on the query parameters
         {
             $lookup: {
