@@ -1542,7 +1542,7 @@ const allproducts = asynchandler(async (req,res)=>{
 
 
 
-const alternateproducts = asynchandler(async (req,res)=>{
+const alternateproducts = asynchandler(async (req,res)=>{       
 
     var {category}= req.params
      category=category.replace(/_/g, " ")
