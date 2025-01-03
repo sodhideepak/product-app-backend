@@ -377,6 +377,35 @@ const logout =asynchandler(async(req,res)=>{
 
 
 
+const delete_account =asynchandler(async(req,res)=>{
+    await user.findByIdAndDelete(
+        req.user._id
+    )
+    
+
+    const options={
+        httpOnly:true,
+        secure:true,
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accesstoken",options)
+    .clearCookie("refreshtoken",options)
+    .json(
+        new ApiResponse(
+            200,
+            {},
+            "User Account deleted Sucessfully")
+    )
+
+
+})
+
+
+
+
+
 const refreshAccessToken = asynchandler(async(req,res)=>{
     // console.log("req.body : ",req.body);
 
@@ -824,6 +853,7 @@ export {
         send_otp,
         loginuser,
         logout,
+        delete_account,
         verifyemail,
         refreshAccessToken,
         changeCurrentPassword,

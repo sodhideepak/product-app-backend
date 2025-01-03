@@ -1344,6 +1344,9 @@ const most_scanned = asynchandler(async (req,res)=>{
                fetchCount: -1 // Sort by ratings in descending order (highest first)
            }
          },
+         {
+            $limit: 20, // Limit to the top 20 products
+        }
        
 
    ])
@@ -1587,8 +1590,8 @@ const alternateproducts = asynchandler(async (req,res)=>{
                             likedBy: new mongoose.Types.ObjectId(req.user?._id),
                         },
                     },
-                ],
-            },
+                ], 
+            }, 
         },
         {
             $addFields: {
@@ -1663,7 +1666,6 @@ const alternateproducts = asynchandler(async (req,res)=>{
     )
 
 })
-
 
 
 
