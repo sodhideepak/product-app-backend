@@ -35,7 +35,7 @@ router.route("/login").post(loginuser)
 
 router.route("/logout" ).post(verifyJWT,logout)
 
-router.route("/delete_account" ).delete(verifyJWT,delete_account)
+router.route("/delete_account" ).delete(delete_account)
 
 router.route("/refresh-token" ).post(refreshAccessToken)
 

@@ -378,8 +378,35 @@ const logout =asynchandler(async(req,res)=>{
 
 
 const delete_account =asynchandler(async(req,res)=>{
+
+
+
+    const {email,password}= req.body
+
+    if (!email ) {
+        throw new ApiError(400,"username or email is required")     
+    }
+
+    const User = await user.findOne({
+        $or:[ {email}]
+    })
+
+    if (!User) {
+        throw new ApiError(400, "user does not exist")
+        
+    }
+    
+
+    
+    const ispasswordvalid= await User.isPasswordcorrect(password)
+    
+    if (!ispasswordvalid) {
+
+        throw new ApiError(400,"invlid user credientials")
+        
+    } 
     await user.findByIdAndDelete(
-        req.user._id
+        User._id
     )
     
 
