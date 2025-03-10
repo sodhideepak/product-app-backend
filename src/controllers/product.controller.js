@@ -535,6 +535,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         product_category,
         product_sub_category,
         price,
+        quantity,
         measuring_unit,
         fruitsVegetablesPercentage,
         dietry_fiber
@@ -573,7 +574,7 @@ const registerproduct = asynchandler(async (req,res)=>{
     //         fruitsVegetablesPercentage,
     //         dietry_fiber
     //       )
-
+       
     const updatedingredients=ingredients.map(keyword => keyword.trim().toLowerCase());
 
     const Product=await product.create({
@@ -584,6 +585,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         product_keywords:product_keywords || [],
         brand_name:brand_name.trim(),
         price:price,
+        quantity:quantity,
         ingredients:updatedingredients,
         nutritional_value,
         measuring_unit,
