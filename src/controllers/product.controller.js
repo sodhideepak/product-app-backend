@@ -538,6 +538,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         quantity,
         measuring_unit,
         fruitsVegetablesPercentage,
+        allergen,
         dietry_fiber
     }= req.body
     // console.log("email =",email);
@@ -590,6 +591,7 @@ const registerproduct = asynchandler(async (req,res)=>{
         nutritional_value,
         measuring_unit,
         fruitsVegetablesPercentage:fruitsVegetablesPercentage||0,
+        allergen:allergen || [],
         dietry_fiber:dietry_fiber||0,
         // product_finalscore:finalScore,
         // product_nutriscore:nutriScore,
@@ -742,12 +744,13 @@ const showproduct = asynchandler(async (req,res)=>{
     // console.log(req.params)
     const {product_barcode}= req.params
 
+
     if (!product_barcode) {
         throw new ApiError(400,"barcode is required")     
     }
 
     const fetched_product= await product.findOne({
-        $or:[ {product_barcode}]
+        $or:[ {product_barcode:product_barcode},{variation_product_barcode:product_barcode}]
     })
 
     // console.log(fetched_product.ingredients);
@@ -1551,7 +1554,7 @@ const alternateproducts = asynchandler(async (req,res)=>{
 
     var {category}= req.params
      category=category.replace(/_/g, " ")
-    // console.log(category);
+    console.log(category);
        const product_data = await product.aggregate([
         { $match: {product_sub_category:category} },
          // Match products based on the query parameters
@@ -1859,18 +1862,16 @@ const update_product_rating = asynchandler(async(req,res)=>{
 
 const update_product_info = asynchandler(async(req,res)=>{
 
-    const {product_barcode,
-           product_category,
-           product_sub_category,}=req.body
+    const {product_barcode}=req.body;
 
 
            const fetched_product= await product.findOne({
             $or:[ {product_barcode}]
         })
-    
-
-        fetched_product.product_category=capitalizeFirstLetter(product_category);
-        fetched_product.product_sub_category=capitalizeFirstLetter(product_sub_category);
+        const total_weight=fetched_product.quantity;
+console.log(total_weight);
+        // fetched_product.product_category=capitalizeFirstLetter(product_category);
+        fetched_product.nutritional_value.total_weight=total_weight;
   
 
 
@@ -2140,7 +2141,7 @@ const registeringredient = asynchandler(async (req,res)=>{
     })
   
 
-    const result =await ingredient.findById( ingredients_data._id);    
+    const result = await ingredient.findById( ingredients_data._id);    
 
     // console.log
     if (!result) {

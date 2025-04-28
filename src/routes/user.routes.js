@@ -13,10 +13,12 @@ import {
     updateUserAvatar,
     removeUserAvatar,
     // updateUsercoverImage,
-    getUserChannelProfile,
+    // getUserChannelProfile,
     // getWatchHistory,
     forgotpassword,
-    resetpassword
+    resetpassword,
+    contactformenquiry,
+    bookingformenquiry
      } from "../controllers/user.controller.js";
 import { consumed_products,consumed_products_day,getMonthlyReport } from "../controllers/consumption.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -51,7 +53,7 @@ router.route("/removeavatar" ).patch(verifyJWT,removeUserAvatar)
 
 // router.route("/coverimage" ).patch(verifyJWT,upload.single("coverimage"),updateUsercoverImage)
 
-router.route("/channel-profile").get(verifyJWT,getUserChannelProfile)
+// router.route("/channel-profile").get(verifyJWT,getUserChannelProfile)
 
 // router.route("/history").get(verifyJWT,getWatchHistory)
 
@@ -59,6 +61,16 @@ router.route("/forgotpassword").post(forgotpassword)
 
 router.route("/resetpassword").post(resetpassword)
 
+
+
+
+
+
+// contact and booking form 
+router.route("/contactenquiry").post(contactformenquiry)
+
+
+router.route("/bookingenquiry").post(bookingformenquiry)
 
 
 

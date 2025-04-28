@@ -744,74 +744,6 @@ const removeUserAvatar =asynchandler(async(req,res)=>{
 
 
 
-const getUserChannelProfile = asynchandler(async(req,res)=>{
-    const {username}=req.prams
-
-    if (!username?.trim) {
-        throw new ApiError(400,"username is missing")
-    }
-    
-    const channel =await user.aggregate([
-        {
-            $match: {
-                username :username?.toLowerCase()
-            }
-        },
-        {
-            $lookup: {
-                from:"subscription",
-                localField:"_id",
-                foreignField:"channel",
-                as:"subscribers"
-            }
-        },
-        {
-            $lookup: {
-                from:"subscription",
-                localField:"_id",
-                foreignField:"subscriber",
-                as:"subscribedTo"
-            }
-        },
-        {
-            $addFields:{
-                subscriberscount:{
-                    $size:"$subscribers"
-                },
-                channelssubscribedtocount:{
-                    $size:"$subscribedTo"
-                },
-                isSubscribed:{
-                    if: {$in:[req.user?._id,"$subscribers.subscriber"]},
-                    then:true,
-                    else:false
-                }
-
-            }
-        },
-        { 
-            $project:{
-                fullname:1,
-                username:1,
-                subscriberscount:1,
-                channelssubscribedtocount:1,
-                isSubscribed:1,
-                email:1,
-                avatar:1,
-                coverimage:1          
-            }
-        }
-    ])
-
-    if (!channel?.length) {
-        throw new ApiError(400,"channel does not exists")
-        
-    }
-
-    return res
-    .status(200)
-    .json(new ApiResponse(200,channel[0],"user cahnnel fetched sucessfully"))
-})
 
 
 
@@ -841,6 +773,58 @@ const forgotpassword = asynchandler(async(req,res)=>{
 
 })
 
+
+
+const contactformenquiry = asynchandler(async(req,res)=>{
+
+    // before production just change the link address to render addresss of which the email is send to user
+    // change the address of mail in mail optins in the send password reset mail
+    
+            const email = req.body.email
+            const userdata =await user.findOne({email:email})
+    
+            if (userdata) {
+                const ramdomotp=Randomstring.generate()
+                await user.updateOne({email:email},{$set:{token:ramdomotp}})
+    
+               sendresetpasswordmail(userdata.fullname,userdata.email,ramdomotp)
+    
+               return res
+               .status(200)
+               .json(new ApiResponse(200,"mail has been sent sucessfully"))
+            } else {
+                throw new ApiError(404,"user email does not exist")
+            }
+        
+    
+    })
+
+
+
+const bookingformenquiry = asynchandler(async(req,res)=>{
+
+        // before production just change the link address to render addresss of which the email is send to user
+        // change the address of mail in mail optins in the send password reset mail
+        
+                const email = req.body.email
+                const userdata =await user.findOne({email:email})
+        
+                if (userdata) {
+                    const ramdomotp=Randomstring.generate()
+                    await user.updateOne({email:email},{$set:{token:ramdomotp}})
+        
+                   sendresetpasswordmail(userdata.fullname,userdata.email,ramdomotp)
+        
+                   return res
+                   .status(200)
+                   .json(new ApiResponse(200,"mail has been sent sucessfully"))
+                } else {
+                    throw new ApiError(404,"user email does not exist")
+                }
+            
+        
+        })
+    
 
 
 
@@ -888,7 +872,9 @@ export {
         updateAccountDetails,
         updateUserAvatar,
         removeUserAvatar,
-        getUserChannelProfile,
         forgotpassword,
-        resetpassword
+        resetpassword,
+        contactformenquiry,
+        bookingformenquiry
+
     }

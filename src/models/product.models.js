@@ -8,9 +8,17 @@ const productschema= new Schema(
         type:String, //cloudinary url
         required:true
     },
-     product_name:{
+    variation_product_barcode:{
+        type:Object, 
+        trim: true
+    },
+    // company_prefix:{
+    //     type:String, //cloudinary url
+    //     trim: true
+    // },  
+     product_name:{     
         type:String,
-        required:true
+        required:true 
     },
     product_keywords:{
         type:Object,
@@ -48,7 +56,11 @@ const productschema= new Schema(
     fruitsVegetablesPercentage:{
         type:Number
     },
-    per_serve:{
+    allergen:{
+        type:Object,
+        trim: true
+    },
+    serving_size:{
         type:String
     },
     measuring_unit:{
